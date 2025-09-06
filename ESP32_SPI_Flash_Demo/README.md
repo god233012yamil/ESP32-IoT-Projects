@@ -99,7 +99,7 @@ esp32-spi-flash-demo/
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/yourusername/esp32-spi-flash-demo.git
+   git clone https://github.com/god233012yamil/esp32-spi-flash-demo.git
    cd esp32-spi-flash-demo
    ```
 
