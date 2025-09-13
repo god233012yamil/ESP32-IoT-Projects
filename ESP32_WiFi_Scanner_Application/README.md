@@ -8,17 +8,12 @@ A comprehensive WiFi scanning application for ESP32 microcontrollers using ESP-I
 wifi_scanner/
 ├── CMakeLists.txt                 # Main project build configuration
 ├── sdkconfig                      # ESP-IDF SDK configuration
-├── Kconfig.projbuild             # Custom configuration options
-├── README.md                     # This file
+├── README.md                     
+├── LICENSE
 ├── main/
 │   ├── CMakeLists.txt            # Main component build file
+│   ├── Kconfig.projbuild         # Custom configuration options
 │   ├── wifi_scanner.c            # Basic scanner implementation
-│   └── wifi_scanner_advanced.c   # Advanced scanner with analytics
-├── components/                   # Optional custom components
-├── docs/
-│   ├── API_REFERENCE.md          # API documentation
-│   ├── CONFIGURATION.md          # Configuration guide
-│   └── TROUBLESHOOTING.md        # Common issues and solutions
 └── build/                        # Build output directory (auto-generated)
 ```
 
