@@ -18,7 +18,7 @@ A growing collection of ESP32 IoT projects showcasing connectivity, peripherals,
 ## Getting Started
 1. Clone this repository:
    ```bash
-   git clone https://github.com/yourusername/ESP32-IoT-Projects.git
+   git clone https://github.com/god233012yamil/ESP32-IoT-Projects.git
    ```
 2. Open your preferred ESP32 development environment (ESP-IDF or Arduino IDE).
 3. Navigate into the project folder of your choice.
