@@ -35,8 +35,8 @@
 static const char *TAG = "MAIN";
 
 // WiFi Configuration - CHANGE THESE TO YOUR NETWORK
-#define WIFI_SSID      "GodIsTheLord"
-#define WIFI_PASSWORD  "08@God@2330"
+#define WIFI_SSID      "WIFI_SSID"
+#define WIFI_PASSWORD  "WIFI_PASSWORD"
 
 // WiFi event group
 #define WIFI_CONNECTED_BIT BIT0
