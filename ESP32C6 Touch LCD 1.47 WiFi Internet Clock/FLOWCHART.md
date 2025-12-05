@@ -57,58 +57,36 @@ flowchart TD
 Detailed state machine showing WiFi connection handling with event-driven architecture.
 
 ```mermaid
-stateDiagram-v2
-    [*] --> INIT: app_main calls wifi_init_sta
+flowchart TD
+    Start([app_main calls<br/>wifi_init_sta]) --> Init[Initialize WiFi<br/>Create Event Group<br/>Register Handlers]
     
-    INIT: Initialize WiFi
-    INIT: Create Event Group
-    INIT: Register Event Handlers
+    Init --> Config[Set WiFi Config<br/>Mode: STA<br/>Auth: WPA2-PSK<br/>SSID + Password]
     
-    INIT --> CONFIGURED: Set WiFi Config
+    Config --> StartWiFi[Start WiFi<br/>esp_wifi_start]
     
-    CONFIGURED: WiFi Mode STA
-    CONFIGURED: Auth WPA2-PSK
-    CONFIGURED: SSID and Password Set
+    StartWiFi --> WaitStart[Wait for<br/>WIFI_EVENT_STA_START]
     
-    CONFIGURED --> STARTING: esp_wifi_start
+    WaitStart --> Connect[Attempt Connection<br/>esp_wifi_connect<br/>Retry: 0/5]
     
-    STARTING: WiFi Starting
-    STARTING --> CONNECTING: WIFI_EVENT_STA_START
+    Connect --> WaitResult{Wait for Event}
     
-    CONNECTING: Attempting Connection
-    CONNECTING: Retry Count 0 of 5
+    WaitResult -->|IP_EVENT_STA_GOT_IP| Success[Connected!<br/>IP Address Acquired<br/>Set WIFI_CONNECTED_BIT]
     
-    CONNECTING --> RETRY: WIFI_EVENT_STA_DISCONNECTED and retry < 5
-    CONNECTING --> CONNECTED: IP_EVENT_STA_GOT_IP
-    CONNECTING --> FAILED: WIFI_EVENT_STA_DISCONNECTED and retry >= 5
+    WaitResult -->|WIFI_EVENT_STA_DISCONNECTED| CheckRetry{Retry Count<br/>< 5?}
     
-    RETRY: Increment Retry Counter
-    RETRY: Wait and Reconnect
-    RETRY --> CONNECTING: esp_wifi_connect
+    CheckRetry -->|Yes| Increment[Increment Retry<br/>Wait 1 Second]
+    Increment --> Connect
     
-    CONNECTED: WiFi Connected
-    CONNECTED: IP Address Acquired
-    CONNECTED: Set WIFI_CONNECTED_BIT
-    CONNECTED --> [*]: Return ESP_OK
+    CheckRetry -->|No| Failed[Connection Failed<br/>Set WIFI_FAIL_BIT<br/>Display Error Message]
     
-    FAILED: Connection Failed
-    FAILED: Set WIFI_FAIL_BIT
-    FAILED: Display Error
-    FAILED --> [*]: Return ESP_FAIL
+    Success --> Return1([Return ESP_OK<br/>Continue to NTP Sync])
+    Failed --> Return2([Return ESP_FAIL<br/>System Halts])
     
-    note right of INIT
-        WiFi Event Handlers:
-        WIFI_EVENT_STA_START
-        WIFI_EVENT_STA_DISCONNECTED
-        IP_EVENT_STA_GOT_IP
-    end note
-    
-    note right of CONNECTED
-        Network Ready:
-        Internet Access Available
-        Ready for NTP Sync
-        Auto-Reconnect Active
-    end note
+    style Start fill:#90EE90
+    style Success fill:#87CEEB
+    style Failed fill:#FFB6C1
+    style Return1 fill:#90EE90
+    style Return2 fill:#DC143C
 ```
 
 ---
