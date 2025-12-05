@@ -426,7 +426,7 @@ See [CHANGES.md](CHANGES.md) for detailed version history.
 
 ## 📄 License
 
-This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 Based on WaveShare factory demo code. ESP-IDF components are licensed under Apache 2.0.
 
