@@ -1,0 +1,374 @@
+═══════════════════════════════════════════════════════════════════
+                    COMPLETE 5×8 ASCII FONT
+                    95 Characters (ASCII 32-126)
+═══════════════════════════════════════════════════════════════════
+
+FILE CREATED
+------------
+
+font_5x8.h - Complete 5×8 pixel font header file
+
+COVERAGE
+--------
+
+This font includes ALL printable ASCII characters:
+
+ASCII 32-126 (95 characters total):
+  - Space (32)
+  - Punctuation: ! " # $ % & ' ( ) * + , - . /
+  - Numbers: 0 1 2 3 4 5 6 7 8 9
+  - More punctuation: : ; < = > ? @
+  - Uppercase: A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
+  - Brackets: [ \ ] ^ _ `
+  - Lowercase: a b c d e f g h i j k l m n o p q r s t u v w x y z
+  - Final symbols: { | } ~
+
+WHAT'S NEW
+----------
+
+Compared to the limited font in v5.0:
+✓ Lowercase letters (a-z) - NEW!
+✓ All punctuation marks - NEW!
+✓ All brackets and symbols - NEW!
+✓ Complete number set (was already there)
+✓ Complete uppercase (was already there)
+
+Total: 95 characters vs 45 in old font
+
+CHARACTER EXAMPLES
+------------------
+
+Letters:
+  Uppercase: ABCDEFGHIJKLMNOPQRSTUVWXYZ
+  Lowercase: abcdefghijklmnopqrstuvwyz
+
+Numbers:
+  0123456789
+
+Punctuation:
+  ! " # $ % & ' ( ) * + , - . /
+  : ; < = > ? @ [ \ ] ^ _ ` { | } ~
+
+HOW TO USE IN YOUR PROJECT
+--------------------------
+
+Step 1: Add font_5x8.h to your project
+---------------------------------------
+
+Copy font_5x8.h to your main/ directory:
+
+  esp32c6_wifi_time/
+  ├── main/
+  │   ├── main.c
+  │   ├── font_5x8.h  ← Add this file here
+  │   └── CMakeLists.txt
+  └── ...
+
+Step 2: Include the header in main.c
+-------------------------------------
+
+At the top of main.c, replace the old font array with:
+
+  #include "font_5x8.h"
+
+Step 3: Update char_to_index() function
+----------------------------------------
+
+Replace the old char_to_index() function with:
+
+  static int char_to_index(char c) {
+      if (c < 32 || c > 126) {
+          return 0;  // Return space for invalid characters
+      }
+      return c - 32;
+  }
+
+That's it! Now you can display ANY printable ASCII character.
+
+ALTERNATIVE: Direct Usage
+-------------------------
+
+You can also use the helper functions provided in the header:
+
+  // Get glyph for character
+  const uint8_t* glyph = font_5x8_get_glyph('A');
+  
+  // Check if character is printable
+  if (font_5x8_is_printable(c)) {
+      // Character can be displayed
+  }
+
+COMPLETE INTEGRATION EXAMPLE
+-----------------------------
+
+Replace the old font array in main.c (around line 51-96) with:
+
+  #include "font_5x8.h"  // At top of file
+  
+  // Delete old font_5x8[][] array
+  // Delete old char_to_index() function
+  
+  // Add new char_to_index() function:
+  static int char_to_index(char c) {
+      if (c < 32 || c > 126) {
+          return 0;  // Space for invalid
+      }
+      return c - 32;
+  }
+
+The rest of your code (draw_char, draw_string) remains unchanged!
+
+TESTING THE NEW FONT
+---------------------
+
+You can now display text with mixed case, punctuation, and symbols:
+
+  // Date with slashes
+  draw_string("12/03/2024", x, y, COLOR_BLACK, COLOR_WHITE, 2);
+  
+  // Mixed case
+  draw_string("Hello World!", x, y, COLOR_BLACK, COLOR_WHITE, 2);
+  
+  // Email address
+  draw_string("user@email.com", x, y, COLOR_BLACK, COLOR_WHITE, 2);
+  
+  // URL
+  draw_string("https://example.com", x, y, COLOR_BLACK, COLOR_WHITE, 2);
+  
+  // Temperature
+  draw_string("72°F", x, y, COLOR_BLACK, COLOR_WHITE, 2);
+  
+  // Symbols
+  draw_string("< > [ ] { } | ~", x, y, COLOR_BLACK, COLOR_WHITE, 2);
+
+FONT FORMAT DETAILS
+-------------------
+
+Data Structure:
+  - Array of 95 characters
+  - Each character is 5 bytes
+  - Each byte represents one column (5 pixels wide)
+  - Each bit in the byte represents one pixel (8 pixels tall)
+
+Pixel Mapping:
+  Bit 0 = Top pixel
+  Bit 1 = Second pixel
+  ...
+  Bit 7 = Bottom pixel
+
+Example - Letter 'A' (ASCII 65):
+  {0x7E, 0x11, 0x11, 0x11, 0x7E}
+  
+  Column 0: 0x7E = 01111110
+  Column 1: 0x11 = 00010001
+  Column 2: 0x11 = 00010001
+  Column 3: 0x11 = 00010001
+  Column 4: 0x7E = 01111110
+  
+  Visual representation:
+    .####.
+    #....#
+    #....#
+    ######
+    #....#
+    #....#
+    #....#
+    ......
+
+MEMORY USAGE
+------------
+
+Size: 95 characters × 5 bytes = 475 bytes
+Type: const (stored in flash, not RAM)
+Overhead: Minimal - just the array
+
+This is very efficient - less than 0.5 KB!
+
+CHARACTER SET REFERENCE
+-----------------------
+
+Dec | Hex | Char | Description
+----|-----|------|------------------
+ 32 | 20  | ' '  | Space
+ 33 | 21  | !    | Exclamation mark
+ 34 | 22  | "    | Double quote
+ 35 | 23  | #    | Hash / Number sign
+ 36 | 24  | $    | Dollar sign
+ 37 | 25  | %    | Percent
+ 38 | 26  | &    | Ampersand
+ 39 | 27  | '    | Single quote
+ 40 | 28  | (    | Left parenthesis
+ 41 | 29  | )    | Right parenthesis
+ 42 | 2A  | *    | Asterisk
+ 43 | 2B  | +    | Plus
+ 44 | 2C  | ,    | Comma
+ 45 | 2D  | -    | Hyphen / Minus
+ 46 | 2E  | .    | Period
+ 47 | 2F  | /    | Slash
+48-57| 30-39| 0-9 | Digits
+ 58 | 3A  | :    | Colon
+ 59 | 3B  | ;    | Semicolon
+ 60 | 3C  | <    | Less than
+ 61 | 3D  | =    | Equal sign
+ 62 | 3E  | >    | Greater than
+ 63 | 3F  | ?    | Question mark
+ 64 | 40  | @    | At sign
+65-90| 41-5A| A-Z | Uppercase letters
+ 91 | 5B  | [    | Left bracket
+ 92 | 5C  | \    | Backslash
+ 93 | 5D  | ]    | Right bracket
+ 94 | 5E  | ^    | Caret
+ 95 | 5F  | _    | Underscore
+ 96 | 60  | `    | Backtick
+97-122|61-7A| a-z | Lowercase letters
+123 | 7B  | {    | Left brace
+124 | 7C  | |    | Vertical bar
+125 | 7D  | }    | Right brace
+126 | 7E  | ~    | Tilde
+
+ADVANTAGES OF THIS FONT
+------------------------
+
+1. Complete Coverage
+   - Every printable ASCII character
+   - No missing symbols
+   - Professional appearance
+
+2. Compact Size
+   - Only 475 bytes
+   - Stored in flash (not RAM)
+   - Very efficient
+
+3. Easy to Use
+   - Simple array lookup
+   - Helper functions provided
+   - Drop-in replacement
+
+4. Well Documented
+   - Clear comments
+   - Usage examples
+   - Character reference
+
+5. Standard Format
+   - Compatible with most 5x8 font renderers
+   - Common bit format
+   - Easy to modify if needed
+
+COMPARISON: OLD vs NEW FONT
+----------------------------
+
+Feature          | Old Font | New Font
+-----------------|----------|----------
+Uppercase        | Yes      | Yes
+Lowercase        | No       | Yes ✓
+Numbers          | Yes      | Yes
+Punctuation      | Limited  | Complete ✓
+Brackets         | No       | Yes ✓
+Symbols          | Limited  | Complete ✓
+Total Characters | ~45      | 95 ✓
+File Size        | Inline   | Separate .h ✓
+Documentation    | None     | Complete ✓
+
+EXTENDING THE FONT
+------------------
+
+If you need characters beyond ASCII 126:
+
+1. Add more entries to the array
+2. Update the range check in char_to_index()
+3. Document the new characters
+
+Example for degree symbol (°):
+  {0x06, 0x09, 0x09, 0x06, 0x00}  // Small circle
+
+TROUBLESHOOTING
+---------------
+
+Problem: Character displays as space
+Solution: Character may be < 32 or > 126
+         Check your string for control characters
+
+Problem: Garbage characters displayed
+Solution: Verify you're using the new char_to_index()
+         Make sure c - 32 is the correct offset
+
+Problem: Lowercase not working
+Solution: Confirm you're using the new font_5x8.h
+         Old font didn't have lowercase
+
+Problem: Special symbols not displaying
+Solution: Check ASCII value is 32-126
+         Some symbols may need escape sequences in C strings
+
+EXAMPLE PROJECT UPDATE
+----------------------
+
+To update the WiFi clock project (v5.0) to use this font:
+
+1. Copy font_5x8.h to esp32c6_wifi_time/main/
+
+2. Edit main.c:
+   - Line 1: Add #include "font_5x8.h"
+   - Lines 51-96: Delete old font array
+   - Lines 98-111: Delete old char_to_index()
+   - Add new char_to_index() as shown above
+
+3. Rebuild:
+   idf.py build
+   idf.py flash
+
+4. Test with new strings:
+   draw_string("Hello, World! 123", x, y, COLOR_BLACK, COLOR_WHITE, 2);
+
+REAL-WORLD USAGE EXAMPLES
+--------------------------
+
+Email Display:
+  draw_string("user@example.com", 10, 100, COLOR_BLACK, COLOR_WHITE, 1);
+
+Temperature:
+  char temp[20];
+  sprintf(temp, "Temp: %d°F", temperature);
+  draw_string(temp, 10, 120, COLOR_BLACK, COLOR_WHITE, 2);
+
+URL Display:
+  draw_string("https://site.com", 10, 140, COLOR_BLACK, COLOR_WHITE, 1);
+
+Math Expression:
+  draw_string("(a+b)*c = 42", 10, 160, COLOR_BLACK, COLOR_WHITE, 2);
+
+File Path:
+  draw_string("/home/user/file.txt", 10, 180, COLOR_BLACK, COLOR_WHITE, 1);
+
+Code Snippet:
+  draw_string("if (x > 0) {", 10, 200, COLOR_BLACK, COLOR_WHITE, 1);
+
+PERFORMANCE
+-----------
+
+Character Lookup: O(1) - Direct array access
+Memory Access: Flash (not RAM) - No runtime memory cost
+Draw Speed: Same as before - No performance impact
+
+CREDITS
+-------
+
+Font Design: Standard 5×8 ASCII font
+Format: Column-major, LSB-first
+Source: Industry standard character definitions
+
+═══════════════════════════════════════════════════════════════════
+                        FILE SUMMARY
+═══════════════════════════════════════════════════════════════════
+
+File: font_5x8.h
+Size: ~6 KB (source), 475 bytes (compiled)
+Type: C header file (.h)
+Usage: #include "font_5x8.h"
+Characters: 95 (ASCII 32-126)
+Format: 5×8 pixel bitmap
+Status: Ready to use ✓
+
+This is a drop-in replacement for the old font!
+Just include the header and update char_to_index().
+═══════════════════════════════════════════════════════════════════

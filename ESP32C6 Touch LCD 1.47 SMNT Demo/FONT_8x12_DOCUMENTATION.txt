@@ -1,0 +1,419 @@
+═══════════════════════════════════════════════════════════════════
+                        8×12 PIXEL FONT
+                    95 Characters (ASCII 32-126)
+═══════════════════════════════════════════════════════════════════
+
+FILE CREATED
+------------
+
+font_8x12.h - Complete 8×12 pixel font header file
+
+SIZE COMPARISON
+---------------
+
+5×8 Font:
+  - Width: 5 pixels
+  - Height: 8 pixels
+  - Bytes per character: 5
+  - Total size: 95 × 5 = 475 bytes
+
+8×12 Font:
+  - Width: 8 pixels
+  - Height: 12 pixels
+  - Bytes per character: 12
+  - Total size: 95 × 12 = 1,140 bytes
+
+The 8×12 font is 60% WIDER and 50% TALLER!
+Better readability, more professional appearance.
+
+FORMAT DIFFERENCE
+-----------------
+
+5×8 Font Format:
+  - Column-major (5 columns)
+  - Each byte = 1 column of 8 pixels
+  - Bit 0 = top, Bit 7 = bottom
+
+8×12 Font Format:
+  - Row-major (12 rows)
+  - Each byte = 1 row of 8 pixels
+  - Bit 0 = left, Bit 7 = right
+
+This format is easier to work with for larger fonts!
+
+HOW TO USE IN YOUR PROJECT
+--------------------------
+
+Step 1: Add font_8x12.h to your project
+---------------------------------------
+
+Copy font_8x12.h to your main/ directory:
+
+  esp32c6_wifi_time/
+  ├── main/
+  │   ├── main.c
+  │   ├── font_8x12.h  ← Add this file
+  │   └── CMakeLists.txt
+  └── ...
+
+Step 2: Include the header in main.c
+-------------------------------------
+
+At the top of main.c:
+
+  #include "font_8x12.h"
+
+Step 3: Update draw_char() function
+------------------------------------
+
+The 8×12 font uses a different format (row-major instead of column-major).
+You need to update your draw_char() function:
+
+OLD (for 5×8):
+```c
+static void draw_char(char c, int x, int y, uint16_t color, uint16_t bg_color, int scale) {
+    int idx = char_to_index(c);
+    
+    for (int col = 0; col < 5; col++) {
+        uint8_t line = font_5x8[idx][col];
+        for (int row = 0; row < 8; row++) {
+            uint16_t pixel_color = (line & (1 << row)) ? color : bg_color;
+            
+            for (int sx = 0; sx < scale; sx++) {
+                for (int sy = 0; sy < scale; sy++) {
+                    int px = x + col * scale + sx;
+                    int py = y + row * scale + sy;
+                    if (px < LCD_WIDTH && py < LCD_HEIGHT) {
+                        esp_lcd_panel_draw_bitmap(panel_handle, px, py, px + 1, py + 1, &pixel_color);
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
+NEW (for 8×12):
+```c
+static void draw_char(char c, int x, int y, uint16_t color, uint16_t bg_color, int scale) {
+    int idx = char_to_index(c);
+    
+    for (int row = 0; row < 12; row++) {
+        uint8_t line = font_8x12[idx][row];
+        for (int col = 0; col < 8; col++) {
+            uint16_t pixel_color = (line & (1 << col)) ? color : bg_color;
+            
+            for (int sx = 0; sx < scale; sx++) {
+                for (int sy = 0; sy < scale; sy++) {
+                    int px = x + col * scale + sx;
+                    int py = y + row * scale + sy;
+                    if (px < LCD_WIDTH && py < LCD_HEIGHT) {
+                        esp_lcd_panel_draw_bitmap(panel_handle, px, py, px + 1, py + 1, &pixel_color);
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
+Step 4: Update draw_string() spacing
+-------------------------------------
+
+Change the character spacing to account for larger width:
+
+OLD (for 5×8):
+```c
+cursor_x += (6 * scale);  // 5 pixels + 1 spacing
+```
+
+NEW (for 8×12):
+```c
+cursor_x += (9 * scale);  // 8 pixels + 1 spacing
+```
+
+Step 5: Update char_to_index()
+-------------------------------
+
+This remains the same:
+
+```c
+static int char_to_index(char c) {
+    if (c < 32 || c > 126) {
+        return 0;  // Space
+    }
+    return c - 32;
+}
+```
+
+COMPLETE DRAW_CHAR FOR 8×12
+----------------------------
+
+Here's the complete implementation optimized for 8×12:
+
+```c
+static void draw_char(char c, int x, int y, uint16_t color, uint16_t bg_color, int scale) {
+    const uint8_t* glyph = font_8x12_get_glyph(c);
+    
+    for (int row = 0; row < 12; row++) {
+        uint8_t line = glyph[row];
+        for (int col = 0; col < 8; col++) {
+            if (line & (1 << col)) {
+                // Draw foreground pixel
+                for (int sy = 0; sy < scale; sy++) {
+                    for (int sx = 0; sx < scale; sx++) {
+                        int px = x + col * scale + sx;
+                        int py = y + row * scale + sy;
+                        if (px < LCD_WIDTH && py < LCD_HEIGHT) {
+                            esp_lcd_panel_draw_bitmap(panel_handle, px, py, px + 1, py + 1, &color);
+                        }
+                    }
+                }
+            } else {
+                // Draw background pixel
+                for (int sy = 0; sy < scale; sy++) {
+                    for (int sx = 0; sx < scale; sx++) {
+                        int px = x + col * scale + sx;
+                        int py = y + row * scale + sy;
+                        if (px < LCD_WIDTH && py < LCD_HEIGHT) {
+                            esp_lcd_panel_draw_bitmap(panel_handle, px, py, px + 1, py + 1, &bg_color);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
+DISPLAY AREA REQUIREMENTS
+--------------------------
+
+For different scales on 172×320 display:
+
+Scale 1×:
+  - Character size: 8×12 pixels
+  - Characters per line: 21 (172/8)
+  - Lines: 26 (320/12)
+  - Good for: Small text, lots of info
+
+Scale 2×:
+  - Character size: 16×24 pixels
+  - Characters per line: 10 (172/16)
+  - Lines: 13 (320/24)
+  - Good for: Normal text, readable
+
+Scale 3×:
+  - Character size: 24×36 pixels
+  - Characters per line: 7 (172/24)
+  - Lines: 8 (320/36)
+  - Good for: Large text, emphasis
+
+EXAMPLE TIME DISPLAY
+---------------------
+
+For WiFi clock (v5.0), you can now use larger text:
+
+OLD (5×8 font, scale 2):
+  - Character size: 10×16 pixels
+  - "12:34:56 PM" = 11 chars = 110 pixels wide
+
+NEW (8×12 font, scale 2):
+  - Character size: 16×24 pixels
+  - "12:34:56 PM" = 11 chars = 176 pixels wide
+  - Too wide! Need scale 1 or different layout
+
+Recommended for clock:
+```c
+// Date on one line (scale 1)
+draw_string("Dec 03 2024", x, 100, COLOR_BLACK, COLOR_WHITE, 1);
+// 11 chars × 8 pixels = 88 pixels (fits easily)
+
+// Time on another line (scale 2)
+draw_string("12:34 PM", x, 130, COLOR_BLACK, COLOR_WHITE, 2);
+// 8 chars × 16 pixels = 128 pixels (fits well)
+```
+
+ADVANTAGES OF 8×12
+------------------
+
+1. Better Readability
+   - Larger characters
+   - More detail possible
+   - Clearer at distance
+
+2. More Professional
+   - Better proportions
+   - Smoother curves
+   - Nicer appearance
+
+3. Better Lowercase
+   - More vertical space
+   - Descenders look better (g, j, p, q, y)
+   - Better x-height
+
+4. Symbols Clearer
+   - More room for detail
+   - Better distinction
+   - Easier to read
+
+DISADVANTAGES OF 8×12
+----------------------
+
+1. Uses More Space
+   - Fewer characters fit
+   - Need more display area
+   - May need smaller scale
+
+2. Slower Rendering
+   - More pixels to draw
+   - Takes longer per character
+   - 2.4× more pixels (8×12 vs 5×8)
+
+3. More Memory
+   - 1,140 bytes vs 475 bytes
+   - Still very reasonable
+   - Stored in flash, not RAM
+
+WHEN TO USE EACH FONT
+----------------------
+
+Use 5×8 Font When:
+  - Need to fit lots of text
+  - Small display area
+  - Simple, compact look
+  - Retro aesthetic desired
+
+Use 8×12 Font When:
+  - Readability is priority
+  - Professional appearance needed
+  - Have space to spare
+  - Displaying important info
+
+You can even use BOTH fonts:
+  - 8×12 for main content
+  - 5×8 for labels/secondary text
+
+MEMORY COMPARISON
+-----------------
+
+Font Size | Bytes | Percentage
+----------|-------|------------
+5×8       | 475   | 100%
+8×12      | 1,140 | 240%
+
+Both are tiny compared to total available flash!
+
+RENDERING PERFORMANCE
+---------------------
+
+Time to draw one character (estimated):
+
+5×8 Font:
+  - Pixels: 40 (5×8)
+  - Scale 2: 160 pixels
+  - Time: ~5ms
+
+8×12 Font:
+  - Pixels: 96 (8×12)
+  - Scale 2: 384 pixels
+  - Time: ~12ms
+
+Full string "12:34:56 PM" (11 chars):
+
+5×8:  ~55ms
+8×12: ~132ms
+
+Still very fast! Display updates every 1000ms.
+
+TESTING THE 8×12 FONT
+----------------------
+
+Test with various strings:
+
+```c
+// Title
+draw_string("Clock", 50, 50, COLOR_BLACK, COLOR_WHITE, 2);
+
+// Time
+draw_string("12:34", 40, 100, COLOR_BLACK, COLOR_WHITE, 2);
+
+// Date
+draw_string("Dec 03 2024", 20, 150, COLOR_BLACK, COLOR_WHITE, 1);
+
+// Small text
+draw_string("WiFi: Connected", 5, 200, COLOR_BLACK, COLOR_WHITE, 1);
+
+// Mixed case
+draw_string("Hello World!", 15, 250, COLOR_BLACK, COLOR_WHITE, 1);
+```
+
+VISUAL COMPARISON
+-----------------
+
+5×8 Font (scale 2):
+  █   █ █████ █     █      ███
+  █   █ █     █     █     █   █
+  █████ █████ █     █     █   █
+  █   █ █     █     █     █   █
+  █   █ █████ █████ █████  ███
+
+8×12 Font (scale 2):
+  ██   ██ ████████ ██       ██        ███████
+  ██   ██ ██       ██       ██       ███   ███
+  ███████ ████████ ██       ██       ███   ███
+  ██   ██ ██       ██       ██       ███   ███
+  ██   ██ ████████ ████████ ████████  ███████
+
+Notice: Taller, wider, more room for detail!
+
+INTEGRATION CHECKLIST
+---------------------
+
+□ Add font_8x12.h to project
+□ Include header in main.c
+□ Update draw_char() to row-major format
+□ Change character width from 5 to 8
+□ Change character height from 8 to 12
+□ Update cursor increment (6 → 9)
+□ Test with sample strings
+□ Adjust scale if needed
+□ Verify text fits display
+□ Check rendering performance
+
+TROUBLESHOOTING
+---------------
+
+Problem: Characters look wrong/garbled
+Solution: Make sure you updated draw_char() to use row-major format
+         Check you're iterating rows 0-11, cols 0-7
+
+Problem: Characters too wide
+Solution: Use scale 1 instead of scale 2
+         Or use 5×8 font for that content
+
+Problem: Text doesn't fit
+Solution: Reduce scale factor
+         Use shorter strings
+         Split across multiple lines
+
+Problem: Slower rendering
+Solution: Normal - 8×12 has more pixels
+         Still fast enough for 1 Hz updates
+         Optimize by drawing only changed chars
+
+═══════════════════════════════════════════════════════════════════
+                        FILE SUMMARY
+═══════════════════════════════════════════════════════════════════
+
+File: font_8x12.h
+Size: ~15 KB (source), 1,140 bytes (compiled)
+Type: C header file (.h)
+Format: 8×12 pixel bitmap, row-major
+Usage: #include "font_8x12.h"
+Characters: 95 (ASCII 32-126)
+Advantages: Larger, more readable, professional
+Status: Ready to use ✓
+
+Note: Requires draw_char() update for row-major format!
+═══════════════════════════════════════════════════════════════════
