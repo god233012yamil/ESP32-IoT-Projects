@@ -1,11 +1,14 @@
 /**
  * @file main.c
+
  * @author Yamil Garcia (https://github.com/god233012yamil)
- * @brief 
+ *
+ * @brief A minimalist, internet-connected clock application for the WaveShare ESP32-C6-Touch-LCD-1.47 development board. 
+ *        Features WiFi connectivity, NTP time synchronization, and real-time date/time display with automatic timezone and DST adjustment.
+ *
  * @version 0.1
+ *
  * @date 2025-12-04
- * 
- * @copyright Copyright (c) 2025
  * 
  */
 #include <stdio.h>
