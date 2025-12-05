@@ -73,7 +73,7 @@ static int wifi_retry_num = 0;
 #else
     #error "Invalid DISPLAY_ORIENTATION value. Use DISPLAY_PORTRAIT_MODE or DISPLAY_LANDSCAPE_MODE."
 #endif
-#define LCD_PIXEL_CLOCK (80 * 1000 * 1000)
+#define LCD_PIXEL_CLOCK (80 * 1000 * 1000) // 80 MHz
 
 // Colors (RGB565 format)
 #define COLOR_BLACK     0x0000 
@@ -93,7 +93,7 @@ static int wifi_retry_num = 0;
 #define BACKGROUND_COLOR COLOR_BLACK 
 
 // Scaling factor for fonts
-#define FONT_SCALE  3//2  
+#define FONT_SCALE  4//2  
 
 #define FONT_8x5    1    
 #define FONT_8x12   2
@@ -103,9 +103,11 @@ static int wifi_retry_num = 0;
 #if SELECTED_FONT == FONT_8x5
     #define CHAR_WIDTH 5
     #define CHAR_HEIGHT 8
+    #define LINE_SPACING 3
 #elif SELECTED_FONT == FONT_8x12
     #define CHAR_WIDTH 8
     #define CHAR_HEIGHT 12
+    #define LINE_SPACING 15
 #else
     ESP_LOGE(TAG, "No font selected. Define SELECTED_FONT as FONT_8x5 or FONT_8x12.");
 #endif 
@@ -171,7 +173,14 @@ static void draw_char(char c, int x, int y, uint16_t color, uint16_t bg_color, i
 }
 
 /**
- * @brief Draw a character using the 8x5 font at the specified position with given colors and scale.
+ * @brief Draw a character using the 8x5 font - BUFFERED VERSION
+ * 
+ * This buffered version uses column-by-column processing with a buffer
+ * to reduce SPI transactions and improve performance.
+ * 
+ * Original: 5 cols × 8 rows × scale² = 360 SPI transactions (scale=3)
+ * Buffered: 5 cols × scale = 15 SPI transactions (scale=3)
+ * Improvement: 24x fewer transactions
  * 
  * @param c The character to draw.
  * @param x The x-coordinate of the top-left corner where the character will be drawn.
@@ -183,27 +192,66 @@ static void draw_char(char c, int x, int y, uint16_t color, uint16_t bg_color, i
 static void draw_char_8x5(char c, int x, int y, uint16_t color, uint16_t bg_color, int scale) {
     int idx = char_to_index(c);
     
+    // Allocate buffer for one scaled column (height = 8 * scale)
+    const int col_height = 8 * scale;
+    uint16_t *col_buffer = (uint16_t *)malloc(col_height * sizeof(uint16_t));
+    
+    if (col_buffer == NULL) {
+        ESP_LOGE(TAG, "Failed to allocate column buffer for 8x5 font");
+        return;
+    }
+    
+    // Process each column (0 to 4)
     for (int col = 0; col < 5; col++) {
         uint8_t line = font_5x8[idx][col];
+        
+        // Build the column buffer
+        int buffer_idx = 0;
+        
         for (int row = 0; row < 8; row++) {
+            // Check if this row's bit is set
             uint16_t pixel_color = (line & (1 << row)) ? color : bg_color;
             
-            // Draw scaled pixel
-            for (int sx = 0; sx < scale; sx++) {
-                for (int sy = 0; sy < scale; sy++) {
-                    int px = x + col * scale + sx;
-                    int py = y + row * scale + sy;
-                    if (px < LCD_WIDTH && py < LCD_HEIGHT) {
-                        esp_lcd_panel_draw_bitmap(panel_handle, px, py, px + 1, py + 1, &pixel_color);
-                    }
+            // Repeat this pixel vertically for scaling
+            for (int sy = 0; sy < scale; sy++) {
+                col_buffer[buffer_idx++] = pixel_color;
+            }
+        }
+        
+        // Draw this scaled column (width = scale, height = col_height)
+        for (int sx = 0; sx < scale; sx++) {
+            int px = x + col * scale + sx;
+            
+            if (px >= 0 && px < LCD_WIDTH) {
+                // Draw the entire column in one transaction
+                int draw_y1 = y;
+                int draw_y2 = y + col_height;
+                
+                // Clip to screen boundaries
+                if (draw_y1 < 0) draw_y1 = 0;
+                if (draw_y2 > LCD_HEIGHT) draw_y2 = LCD_HEIGHT;
+                
+                if (draw_y1 < draw_y2) {
+                    // Draw vertical strip
+                    esp_lcd_panel_draw_bitmap(panel_handle, 
+                                               px, draw_y1, 
+                                               px + 1, draw_y2, 
+                                               col_buffer);
                 }
             }
         }
     }
+    
+    free(col_buffer);
 }
 
 /**
- * @brief Draw a character using the 8x12 font at the specified position with given colors and scale.
+ * @brief Draw a character using the 8x12 font - CORRECTED VERSION
+ * 
+ * This version uses COLUMN-BY-COLUMN buffering to match the approach
+ * used in draw_char_8x5. Each column is buffered and drawn as a vertical strip.
+ * 
+ * This eliminates flickering while maintaining correct text rendering.
  * 
  * @param c The character to draw.
  * @param x The x-coordinate of the top-left corner where the character will be drawn.
@@ -213,24 +261,61 @@ static void draw_char_8x5(char c, int x, int y, uint16_t color, uint16_t bg_colo
  * @param scale The scaling factor for the character size.
  */
 static void draw_char_8x12(char c, int x, int y, uint16_t color, uint16_t bg_color, int scale) {
+    // Get the character index in the font array
     int idx = char_to_index(c);
     
-    for (int row = 0; row < 12; row++) {
-        uint8_t line = font_8x12[idx][row];
-        for (int col = 0; col < 8; col++) {
+    // Allocate buffer for one scaled column (height = 12 * scale)
+    const int col_height = 12 * scale;
+    uint16_t *col_buffer = (uint16_t *)malloc(col_height * sizeof(uint16_t));
+    
+    if (col_buffer == NULL) {
+        ESP_LOGE(TAG, "Failed to allocate column buffer");
+        return;
+    }
+    
+    // Process each column (0 to 7)
+    for (int col = 0; col < 8; col++) {
+        
+        // Build the column buffer by extracting this column from all rows
+        int buffer_idx = 0;
+        
+        for (int row = 0; row < 12; row++) {
+            uint8_t line = font_8x12[idx][row];
+            
+            // Check if this column's bit is set in this row
             uint16_t pixel_color = (line & (1 << col)) ? color : bg_color;
             
-            for (int sx = 0; sx < scale; sx++) {
-                for (int sy = 0; sy < scale; sy++) {
-                    int px = x + col * scale + sx;
-                    int py = y + row * scale + sy;
-                    if (px < LCD_WIDTH && py < LCD_HEIGHT) {
-                        esp_lcd_panel_draw_bitmap(panel_handle, px, py, px + 1, py + 1, &pixel_color);
-                    }
+            // Repeat this pixel vertically for scaling
+            for (int sy = 0; sy < scale; sy++) {
+                col_buffer[buffer_idx++] = pixel_color;
+            }
+        }
+        
+        // Now draw this scaled column (width = scale, height = col_height)
+        for (int sx = 0; sx < scale; sx++) {
+            int px = x + col * scale + sx;
+            
+            if (px >= 0 && px < LCD_WIDTH) {
+                // Draw the entire column in one transaction
+                int draw_y1 = y;
+                int draw_y2 = y + col_height;
+                
+                // Clip to screen
+                if (draw_y1 < 0) draw_y1 = 0;
+                if (draw_y2 > LCD_HEIGHT) draw_y2 = LCD_HEIGHT;
+                
+                if (draw_y1 < draw_y2) {
+                    // Draw vertical strip
+                    esp_lcd_panel_draw_bitmap(panel_handle, 
+                                               px, draw_y1, 
+                                               px + 1, draw_y2, 
+                                               col_buffer);
                 }
             }
         }
     }
+    
+    free(col_buffer);
 }
 
 /**
@@ -311,29 +396,44 @@ static void backlight_init(void)
  * 
  * @return esp_err_t ESP_OK on success, error code otherwise 
  */
-static esp_err_t display_portrait_init(void)
-{
-    // Initialize SPI bus
-    spi_bus_config_t bus_config = JD9853_PANEL_BUS_SPI_CONFIG(PIN_SCLK, PIN_MOSI, LCD_WIDTH * LCD_HEIGHT * sizeof(uint16_t));
-    bus_config.miso_io_num = PIN_MISO;
+static esp_err_t display_portrait_init(void) {      
+    // Create the SPI bus configuration
+    spi_bus_config_t bus_config = {
+        .mosi_io_num = PIN_MOSI,
+        .miso_io_num = PIN_MISO,
+        .sclk_io_num = PIN_SCLK,
+        .quadwp_io_num = -1,
+        .quadhd_io_num = -1,
+        .max_transfer_sz = LCD_WIDTH * LCD_HEIGHT * sizeof(uint16_t),
+    };
     
+    // Initialize SPI bus
     ESP_ERROR_CHECK(spi_bus_initialize(SPI2_HOST, &bus_config, SPI_DMA_CH_AUTO));
     ESP_LOGI(TAG, "SPI bus initialized");
+
+    // Create the LCD panel IO configuration
+    esp_lcd_panel_io_spi_config_t io_config = {
+        .dc_gpio_num = PIN_DC,
+        .cs_gpio_num = PIN_CS,
+        .pclk_hz = LCD_PIXEL_CLOCK,
+        .lcd_cmd_bits = 8,
+        .lcd_param_bits = 8,
+        .spi_mode = 0,
+        .trans_queue_depth = 10,
+    };
     
-    // Initialize LCD panel IO
-    esp_lcd_panel_io_spi_config_t io_config = JD9853_PANEL_IO_SPI_CONFIG(PIN_CS, PIN_DC, NULL, NULL);
-    io_config.pclk_hz = LCD_PIXEL_CLOCK;
-    
+    // Create LCD panel IO handle, for SPI interface
     ESP_ERROR_CHECK(esp_lcd_new_panel_io_spi((esp_lcd_spi_bus_handle_t)SPI2_HOST, &io_config, &io_handle));
     ESP_LOGI(TAG, "LCD IO initialized");
     
-    // Initialize LCD panel
+    // Create the LCD panel configuration
     esp_lcd_panel_dev_config_t panel_config = {
         .reset_gpio_num = PIN_RST,
         .rgb_ele_order = LCD_RGB_ELEMENT_ORDER_RGB,
         .bits_per_pixel = 16,
-    };
+    }; 
     
+    // Create LCD panel for model jd9853
     ESP_ERROR_CHECK(esp_lcd_new_panel_jd9853(io_handle, &panel_config, &panel_handle));
     ESP_LOGI(TAG, "LCD panel created");
     
@@ -343,11 +443,12 @@ static esp_err_t display_portrait_init(void)
     ESP_ERROR_CHECK(esp_lcd_panel_invert_color(panel_handle, true));
     ESP_ERROR_CHECK(esp_lcd_panel_mirror(panel_handle, false, false));
     ESP_ERROR_CHECK(esp_lcd_panel_swap_xy(panel_handle, false));
-    ESP_LOGI(TAG, "Display orientation: portrait (swap_xy=false)");
-    
-    ESP_ERROR_CHECK(esp_lcd_panel_disp_on_off(panel_handle, true));
+    ESP_LOGI(TAG, "Display orientation: portrait (swap_xy=false)");    
     ESP_ERROR_CHECK(esp_lcd_panel_set_gap(panel_handle, 34, 0));
     ESP_LOGI(TAG, "Display gap set: x=34, y=0 (portrait mode)");
+    
+    // Turn on display
+    ESP_ERROR_CHECK(esp_lcd_panel_disp_on_off(panel_handle, true));
     
     ESP_LOGI(TAG, "Display initialized successfully!");
     
@@ -359,37 +460,51 @@ static esp_err_t display_portrait_init(void)
  * 
  * @return esp_err_t ESP_OK on success, error code otherwise 
  */
-static esp_err_t display_landscape_init(void)
-{
-    // Initialize SPI bus
-    spi_bus_config_t bus_config = JD9853_PANEL_BUS_SPI_CONFIG(PIN_SCLK, PIN_MOSI, LCD_WIDTH * LCD_HEIGHT * sizeof(uint16_t));
-    bus_config.miso_io_num = PIN_MISO;
+static esp_err_t display_landscape_init(void) {
+    // Create the SPI bus configuration
+    spi_bus_config_t bus_config = {
+        .mosi_io_num = PIN_MOSI,
+        .miso_io_num = PIN_MISO,
+        .sclk_io_num = PIN_SCLK,
+        .quadwp_io_num = -1,
+        .quadhd_io_num = -1,
+        .max_transfer_sz = LCD_WIDTH * LCD_HEIGHT * sizeof(uint16_t),
+    };
     
+    // Initialize SPI bus
     ESP_ERROR_CHECK(spi_bus_initialize(SPI2_HOST, &bus_config, SPI_DMA_CH_AUTO));
     ESP_LOGI(TAG, "SPI bus initialized");
+
+    // Create the LCD panel IO configuration
+    esp_lcd_panel_io_spi_config_t io_config = {
+        .dc_gpio_num = PIN_DC,
+        .cs_gpio_num = PIN_CS,
+        .pclk_hz = LCD_PIXEL_CLOCK,
+        .lcd_cmd_bits = 8,
+        .lcd_param_bits = 8,
+        .spi_mode = 0,
+        .trans_queue_depth = 10,
+    };
     
-    // Initialize LCD panel IO
-    esp_lcd_panel_io_spi_config_t io_config = JD9853_PANEL_IO_SPI_CONFIG(PIN_CS, PIN_DC, NULL, NULL);
-    io_config.pclk_hz = LCD_PIXEL_CLOCK;
-    
+    // Create LCD panel IO handle, for SPI interface
     ESP_ERROR_CHECK(esp_lcd_new_panel_io_spi((esp_lcd_spi_bus_handle_t)SPI2_HOST, &io_config, &io_handle));
     ESP_LOGI(TAG, "LCD IO initialized");
     
-    // Initialize LCD panel
+    // Create the LCD panel configuration
     esp_lcd_panel_dev_config_t panel_config = {
         .reset_gpio_num = PIN_RST,
         .rgb_ele_order = LCD_RGB_ELEMENT_ORDER_RGB,
         .bits_per_pixel = 16,
     };
     
+    // Create LCD panel for model jd9853
     ESP_ERROR_CHECK(esp_lcd_new_panel_jd9853(io_handle, &panel_config, &panel_handle));
     ESP_LOGI(TAG, "LCD panel created");
     
     // Reset and initialize panel
     ESP_ERROR_CHECK(esp_lcd_panel_reset(panel_handle));
     ESP_ERROR_CHECK(esp_lcd_panel_init(panel_handle));
-    ESP_ERROR_CHECK(esp_lcd_panel_invert_color(panel_handle, true));
-    
+    ESP_ERROR_CHECK(esp_lcd_panel_invert_color(panel_handle, true));    
     // LANDSCAPE MODE CONFIGURATION
     // For 90-degree rotation (landscape), we need:
     // 1. swap_xy = true (swap X and Y axes)
@@ -397,15 +512,14 @@ static esp_err_t display_landscape_init(void)
     // 3. mirror_y = false (no vertical flip)
     ESP_ERROR_CHECK(esp_lcd_panel_swap_xy(panel_handle, true));
     ESP_ERROR_CHECK(esp_lcd_panel_mirror(panel_handle, true, false));
-    ESP_LOGI(TAG, "Display orientation: landscape (swap_xy=true, mirror_x=true)");
-    
-    // Turn on display
-    ESP_ERROR_CHECK(esp_lcd_panel_disp_on_off(panel_handle, true));
-    
+    ESP_LOGI(TAG, "Display orientation: landscape (swap_xy=true, mirror_x=true)");     
     // CRITICAL: Set gap for landscape mode
     // Landscape uses (0, 34) instead of portrait's (34, 0)
     ESP_ERROR_CHECK(esp_lcd_panel_set_gap(panel_handle, 0, 34));
     ESP_LOGI(TAG, "Display gap set: x=0, y=34 (landscape mode)");
+
+    // Turn on display
+    ESP_ERROR_CHECK(esp_lcd_panel_disp_on_off(panel_handle, true));
     
     ESP_LOGI(TAG, "Display initialized successfully in LANDSCAPE mode (320×172)");
     
@@ -421,10 +535,11 @@ static esp_err_t display_landscape_init(void)
  * @param event_data Event data
  */
 static void wifi_event_handler(void* arg, esp_event_base_t event_base,
-                                int32_t event_id, void* event_data)
-{
+                                int32_t event_id, void* event_data) {
+    // Handle station start event
     if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
         esp_wifi_connect();
+    // Handle disconnection and retry logic
     } else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
         if (wifi_retry_num < MAX_WIFI_RETRY) {
             esp_wifi_connect();
@@ -434,6 +549,7 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base,
             xEventGroupSetBits(wifi_event_group, WIFI_FAIL_BIT);
         }
         ESP_LOGI(TAG, "Connect to the AP failed");
+    // Handle successful IP acquisition
     } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
         ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
         ESP_LOGI(TAG, "Got IP:" IPSTR, IP2STR(&event->ip_info.ip));
@@ -471,6 +587,7 @@ static esp_err_t wifi_init_sta(void)
                                                         NULL,
                                                         &instance_got_ip));
 
+    // Configure WiFi connection settings for station mode
     wifi_config_t wifi_config = {
         .sta = {
             .ssid = WIFI_SSID,
@@ -478,13 +595,14 @@ static esp_err_t wifi_init_sta(void)
             .threshold.authmode = WIFI_AUTH_WPA2_PSK,
         },
     };
+
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
     ESP_ERROR_CHECK(esp_wifi_start());
 
     ESP_LOGI(TAG, "WiFi initialization finished.");
 
-    // Wait for connection
+    // Wait for connection or failure
     EventBits_t bits = xEventGroupWaitBits(wifi_event_group,
             WIFI_CONNECTED_BIT | WIFI_FAIL_BIT,
             pdFALSE,
@@ -508,8 +626,7 @@ static esp_err_t wifi_init_sta(void)
  * 
  * @param tv Pointer to timeval structure
  */
-void time_sync_notification_cb(struct timeval *tv)
-{
+void time_sync_notification_cb(struct timeval *tv) {
     ESP_LOGI(TAG, "Time synchronized!");
     time_synced = true;
 }
@@ -518,12 +635,19 @@ void time_sync_notification_cb(struct timeval *tv)
  * @brief Initialize SNTP
  * 
  */
-static void sntp_initialize(void)
-{
+static void sntp_initialize(void) {
     ESP_LOGI(TAG, "Initializing SNTP");
+
+    // Set SNTP operating mode
     esp_sntp_setoperatingmode(SNTP_OPMODE_POLL);
+
+    // Set NTP server
     esp_sntp_setservername(0, "pool.ntp.org");
+
+    // Set time sync notification callback
     esp_sntp_set_time_sync_notification_cb(time_sync_notification_cb);
+
+    // Start SNTP
     esp_sntp_init();
 }
 
@@ -533,12 +657,14 @@ static void sntp_initialize(void)
  * @param date_str Pointer to buffer for formatted date string
  * @param time_str Pointer to buffer for formatted time string
  */
-static void get_formatted_time(char *date_str, char *time_str)
-{
+static void get_formatted_time(char *date_str, char *time_str) {
     time_t now;
     struct tm timeinfo;
     
+    // Get current time
     time(&now);
+    
+    // Convert to local time
     localtime_r(&now, &timeinfo);
     
     // Format date: "Dec 03, 2024"
@@ -552,8 +678,7 @@ static void get_formatted_time(char *date_str, char *time_str)
  * @brief Display the current date and time on the screen
  * 
  */
-static void display_datetime(void)
-{
+static void display_datetime(void) {
     char date_str[32];
     char time_str[32];
     
@@ -563,18 +688,18 @@ static void display_datetime(void)
     // Calculate starting Y position to center the text block
     int num_lines = 2;
     int text_height = 8 * FONT_SCALE; // Each character is 8 pixels tall in the 5x8 font
-    int line_spacing = 3; // Spacing between lines
+    int line_spacing = LINE_SPACING;//3; // Spacing between lines
     int total_text_height = (text_height * num_lines) + (line_spacing * (num_lines - 1));
     int start_y = (LCD_HEIGHT - total_text_height) / 2;
 
     // Display line 1 centered
     int line_1_len = strlen(date_str);
-    int line_1_x = (LCD_WIDTH - (line_1_len * (CHAR_WIDTH * FONT_SCALE))) / 2; 
+    int line_1_x = ((LCD_WIDTH - (line_1_len * (CHAR_WIDTH * FONT_SCALE))) / 2) - (34 / 2); 
     draw_string(date_str, line_1_x, start_y, FOREGROUND_COLOR, BACKGROUND_COLOR, FONT_SCALE);
 
     // Display line 2 centered
     int line_2_len = strlen(time_str);
-    int line_2_x = (LCD_WIDTH - (line_2_len * (CHAR_WIDTH * FONT_SCALE))) / 2; 
+    int line_2_x = ((LCD_WIDTH - (line_2_len * (CHAR_WIDTH * FONT_SCALE))) / 2) - (34 / 2); 
     draw_string(time_str, line_2_x, start_y + text_height + line_spacing, FOREGROUND_COLOR, BACKGROUND_COLOR, FONT_SCALE);
 }
 
@@ -582,28 +707,27 @@ static void display_datetime(void)
  * @brief Display connecting message on the screen
  * 
  */
-static void display_connecting(void)
-{
+static void display_connecting(void) {
     // Clear screen
     fill_screen(BACKGROUND_COLOR);
 
     // Calculate starting Y position to center the text block
     int num_lines = 2;
     int text_height = 8 * FONT_SCALE; // Each character is 8 pixels tall in the 5x8 font
-    int line_spacing = 3; // Spacing between lines
+    int line_spacing = LINE_SPACING;//3; // Spacing between lines
     int total_text_height = (text_height * num_lines) + (line_spacing * (num_lines - 1));
     int start_y = (LCD_HEIGHT - total_text_height) / 2;
 
     // Display line 1 centered
     char line_1[] = "Connecting";
     int line_1_len = strlen(line_1);
-    int line_1_x = (LCD_WIDTH - (line_1_len * (CHAR_WIDTH * FONT_SCALE))) / 2; 
+    int line_1_x = ((LCD_WIDTH - (line_1_len * (CHAR_WIDTH * FONT_SCALE))) / 2) - (34 / 2); 
     draw_string(line_1, line_1_x, start_y, FOREGROUND_COLOR, BACKGROUND_COLOR, FONT_SCALE);
 
     // Display line 2 centered
     char line_2[] = "to WiFi...";
     int line_2_len = strlen(line_2);
-    int line_2_x = (LCD_WIDTH - (line_2_len * (CHAR_WIDTH * FONT_SCALE))) / 2; 
+    int line_2_x = ((LCD_WIDTH - (line_2_len * (CHAR_WIDTH * FONT_SCALE))) / 2) - (34 / 2); 
     draw_string(line_2, line_2_x, start_y + text_height + line_spacing, FOREGROUND_COLOR, BACKGROUND_COLOR, FONT_SCALE);
 }
 
@@ -611,35 +735,63 @@ static void display_connecting(void)
  * @brief Display connection failed message on the screen
  * 
  */
-static void display_failed(void)
-{
+static void display_failed(void) {
     // Clear screen
     fill_screen(BACKGROUND_COLOR);
 
     // Calculate starting Y position to center the text block
     int num_lines = 3;
     int text_height = 8 * FONT_SCALE; // Each character is 8 pixels tall in the 5x8 font
-    int line_spacing = 3; // Spacing between lines
+    int line_spacing = LINE_SPACING;//3; // Spacing between lines
     int total_text_height = (text_height * num_lines) + (line_spacing * (num_lines - 1));
     int start_y = (LCD_HEIGHT - total_text_height) / 2;
 
     // Display line 1 centered
     char line_1[] = "WiFi";
     int line_1_len = strlen(line_1);
-    int line_1_x = (LCD_WIDTH - (line_1_len * (CHAR_WIDTH * FONT_SCALE))) / 2; 
+    int line_1_x = ((LCD_WIDTH - (line_1_len * (CHAR_WIDTH * FONT_SCALE))) / 2) - (34 / 2); 
     draw_string(line_1, line_1_x, start_y, FOREGROUND_COLOR, BACKGROUND_COLOR, FONT_SCALE);
 
     // Display line 2 centered
     char line_2[] = "Connection";   
     int line_2_len = strlen(line_2);
-    int line_2_x = (LCD_WIDTH - (line_2_len * (CHAR_WIDTH * FONT_SCALE))) / 2; 
+    int line_2_x =  ((LCD_WIDTH - (line_2_len * (CHAR_WIDTH * FONT_SCALE))) / 2) - (34 / 2); 
     draw_string(line_2, line_2_x, start_y + text_height + line_spacing, FOREGROUND_COLOR, BACKGROUND_COLOR, FONT_SCALE);
 
     // Display line 3 centered
     char line_3[] = "Failed!";
     int line_3_len = strlen(line_3);
-    int line_3_x = (LCD_WIDTH - (line_3_len * (CHAR_WIDTH * FONT_SCALE))) / 2; 
+    int line_3_x = ((LCD_WIDTH - (line_3_len * (CHAR_WIDTH * FONT_SCALE))) / 2) - (34 / 2); 
     draw_string(line_3, line_3_x, start_y + 2 * (text_height + line_spacing), FOREGROUND_COLOR, BACKGROUND_COLOR, FONT_SCALE);
+}
+
+/**
+ * @brief Display time synchronization failed message on the screen
+ * 
+ * @return void 
+ */
+static void display_time_sync_failed(void) {
+    // Clear screen
+    fill_screen(BACKGROUND_COLOR);
+
+    // Calculate starting Y position to center the text block
+    int num_lines = 3;
+    int text_height = 8 * FONT_SCALE; // Each character is 8 pixels tall in the 5x8 font
+    int line_spacing = LINE_SPACING;//3; // Spacing between lines
+    int total_text_height = (text_height * num_lines) + (line_spacing * (num_lines - 1));
+    int start_y = (LCD_HEIGHT - total_text_height) / 2;
+
+    // Display line 1 centered
+    char line_1[] = "Time Sync";
+    int line_1_len = strlen(line_1);
+    int line_1_x = ((LCD_WIDTH - (line_1_len * (CHAR_WIDTH * FONT_SCALE))) / 2) - (34 / 2); 
+    draw_string(line_1, line_1_x, start_y, FOREGROUND_COLOR, BACKGROUND_COLOR, FONT_SCALE);
+
+    // Display line 2 centered
+    char line_2[] = "Failed!";   
+    int line_2_len = strlen(line_2);
+    int line_2_x = ((LCD_WIDTH - (line_2_len * (CHAR_WIDTH * FONT_SCALE))) / 2) - (34 / 2); 
+    draw_string(line_2, line_2_x, start_y + text_height + line_spacing, FOREGROUND_COLOR, BACKGROUND_COLOR, FONT_SCALE);
 }
 
 /**
@@ -647,14 +799,20 @@ static void display_failed(void)
  * 
  * @param pvParameters Pointer to task parameters (not used) 
  */
-static void time_display_task(void *pvParameters)
-{
+static void time_display_task(void *pvParameters) {
+    // Clear screen
     fill_screen(BACKGROUND_COLOR);
+    
+    // Initialize the xLastWakeTime variable with the current time
+    TickType_t xLastWakeTime = xTaskGetTickCount();
+    const TickType_t xFrequency = pdMS_TO_TICKS(1000);
+    
+    // Update every second
     while (1) {
         if (time_synced) {
             display_datetime();
         }
-        vTaskDelay(pdMS_TO_TICKS(1000));  // Update every second
+        vTaskDelayUntil(&xLastWakeTime, xFrequency);
     }
 }
 
@@ -662,8 +820,7 @@ static void time_display_task(void *pvParameters)
  * @brief Main application entry point
  * 
  */
-void app_main(void)
-{
+void app_main(void) {
     ESP_LOGI(TAG, "====================================");
     ESP_LOGI(TAG, "ESP32-C6 WiFi Clock");
     ESP_LOGI(TAG, "====================================");
@@ -716,7 +873,7 @@ void app_main(void)
         vTaskDelay(pdMS_TO_TICKS(1000));
         retry++;
     }
-    
+
     if (time_synced) {
         ESP_LOGI(TAG, "Time synchronized successfully");
         fill_screen(BACKGROUND_COLOR);
@@ -724,13 +881,6 @@ void app_main(void)
         xTaskCreate(time_display_task, "time_display", 4096, NULL, 5, NULL);
     } else {
         ESP_LOGE(TAG, "Time synchronization failed");
-        fill_screen(BACKGROUND_COLOR);
-        draw_string("Time Sync", 30, 120, FOREGROUND_COLOR, BACKGROUND_COLOR, FONT_SCALE);
-        draw_string("Failed!", 40, 150, FOREGROUND_COLOR, BACKGROUND_COLOR, FONT_SCALE);
-    }
-    
-    // Main loop
-    while (1) {
-        vTaskDelay(pdMS_TO_TICKS(1000));
+        display_time_sync_failed();
     }
 }
