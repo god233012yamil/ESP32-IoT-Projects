@@ -58,43 +58,56 @@ Detailed state machine showing WiFi connection handling with event-driven archit
 
 ```mermaid
 stateDiagram-v2
-    [*] --> INIT: app_main() calls wifi_init_sta()
+    [*] --> INIT: app_main calls wifi_init_sta
     
-    INIT: Initialize WiFi<br/>Create Event Group<br/>Register Event Handlers
-    INIT --> CONFIGURED: Set WiFi Config<br/>SSID + Password
+    INIT: Initialize WiFi
+    INIT: Create Event Group
+    INIT: Register Event Handlers
     
-    CONFIGURED: WiFi Mode: STA<br/>Auth: WPA2-PSK
-    CONFIGURED --> STARTING: esp_wifi_start()
+    INIT --> CONFIGURED: Set WiFi Config
+    
+    CONFIGURED: WiFi Mode STA
+    CONFIGURED: Auth WPA2-PSK
+    CONFIGURED: SSID and Password Set
+    
+    CONFIGURED --> STARTING: esp_wifi_start
     
     STARTING: WiFi Starting
     STARTING --> CONNECTING: WIFI_EVENT_STA_START
     
-    CONNECTING: Attempting Connection<br/>Retry Count: 0/5
-    CONNECTING --> RETRY: WIFI_EVENT_STA_DISCONNECTED<br/>& retry < 5
+    CONNECTING: Attempting Connection
+    CONNECTING: Retry Count 0 of 5
+    
+    CONNECTING --> RETRY: WIFI_EVENT_STA_DISCONNECTED and retry < 5
     CONNECTING --> CONNECTED: IP_EVENT_STA_GOT_IP
-    CONNECTING --> FAILED: WIFI_EVENT_STA_DISCONNECTED<br/>& retry >= 5
+    CONNECTING --> FAILED: WIFI_EVENT_STA_DISCONNECTED and retry >= 5
     
-    RETRY: Increment Retry Counter<br/>Wait & Reconnect
-    RETRY --> CONNECTING: esp_wifi_connect()
+    RETRY: Increment Retry Counter
+    RETRY: Wait and Reconnect
+    RETRY --> CONNECTING: esp_wifi_connect
     
-    CONNECTED: WiFi Connected<br/>IP Address Acquired<br/>Set WIFI_CONNECTED_BIT
+    CONNECTED: WiFi Connected
+    CONNECTED: IP Address Acquired
+    CONNECTED: Set WIFI_CONNECTED_BIT
     CONNECTED --> [*]: Return ESP_OK
     
-    FAILED: Connection Failed<br/>Set WIFI_FAIL_BIT<br/>Display Error
+    FAILED: Connection Failed
+    FAILED: Set WIFI_FAIL_BIT
+    FAILED: Display Error
     FAILED --> [*]: Return ESP_FAIL
     
     note right of INIT
         WiFi Event Handlers:
-        • WIFI_EVENT_STA_START
-        • WIFI_EVENT_STA_DISCONNECTED
-        • IP_EVENT_STA_GOT_IP
+        WIFI_EVENT_STA_START
+        WIFI_EVENT_STA_DISCONNECTED
+        IP_EVENT_STA_GOT_IP
     end note
     
     note right of CONNECTED
         Network Ready:
-        • Internet Access
-        • Ready for NTP Sync
-        • Auto-Reconnect Active
+        Internet Access Available
+        Ready for NTP Sync
+        Auto-Reconnect Active
     end note
 ```
 
@@ -543,4 +556,4 @@ flowchart TD
 **Document Version**: 1.0  
 **Last Updated**: December 4, 2025  
 **Project**: ESP32-C6 WiFi Internet Clock  
-**License**: Apache 2.0
+**License**: MIT
