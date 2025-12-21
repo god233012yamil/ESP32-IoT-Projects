@@ -27,7 +27,7 @@ A clean, minimal touch screen demonstration for the WaveShare ESP32-C6-Touch-LCD
 - [Troubleshooting](#troubleshooting)
 - [Contributing](#contributing)
 - [Version History](#version-history)
-- [License](#license)
+- [License](#-license)
 - [Acknowledgments](#acknowledgments)
 
 ## ✨ Features
