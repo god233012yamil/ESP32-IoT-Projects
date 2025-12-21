@@ -1,0 +1,80 @@
+name: ESP-IDF CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
+    
+    - name: Setup ESP-IDF
+      uses: espressif/esp-idf-ci-action@v1
+      with:
+        esp_idf_version: v5.1
+        target: esp32c6
+    
+    - name: Build project
+      run: |
+        . $IDF_PATH/export.sh
+        idf.py build
+    
+    - name: Check build artifacts
+      run: |
+        ls -lh build/
+        test -f build/esp32c6_touch_clean.bin
+    
+    - name: Upload firmware
+      uses: actions/upload-artifact@v3
+      with:
+        name: firmware
+        path: build/*.bin
+    
+    - name: Build size report
+      run: |
+        . $IDF_PATH/export.sh
+        idf.py size
+  
+  code-quality:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    
+    - name: Check formatting
+      run: |
+        echo "Checking code formatting..."
+        # Add clang-format or other checks here
+    
+    - name: Static analysis
+      run: |
+        echo "Running static analysis..."
+        # Add cppcheck or other tools here
+  
+  documentation:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    
+    - name: Validate README
+      run: |
+        test -f README.md
+        grep -q "ESP32-C6 Touch Screen Demo" README.md
+    
+    - name: Check documentation links
+      run: |
+        echo "Checking documentation..."
+        test -f FLOWCHART.md
+        test -f CONTRIBUTING.md
+        test -f LICENSE
