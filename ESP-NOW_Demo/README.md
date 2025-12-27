@@ -4,20 +4,20 @@ A minimal, well-documented ESP-NOW project for ESP32-S3 using ESP-IDF and FreeRT
 
 ## 📋 Table of Contents
 
-- [Overview](#overview)
-- [Features](#features)
-- [Hardware Requirements](#hardware-requirements)
-- [Software Requirements](#software-requirements)
-- [Project Structure](#project-structure)
-- [How It Works](#how-it-works)
-- [Getting Started](#getting-started)
-- [Configuration](#configuration)
-- [Building and Flashing](#building-and-flashing)
-- [Usage Examples](#usage-examples)
-- [Troubleshooting](#troubleshooting)
-- [Advanced Topics](#advanced-topics)
-- [Contributing](#contributing)
-- [License](#license)
+- [Overview](#-overview)
+- [Features](#-features)
+- [Hardware Requirements](#-hardware-requirements)
+- [Software Requirements](#-software-requirements)
+- [Project Structure](#-project-structure)
+- [How It Works](#-how-it-works)
+- [Getting Started](#-getting-started)
+- [Configuration](#-configuration)
+- [Building and Flashing](#-building-and-flashing)
+- [Usage Examples](#-usage-examples)
+- [Troubleshooting](#-troubleshooting)
+- [Advanced Topics](#-advanced-topics)
+- [Contributing](#-contributing)
+- [License](#-license)
 
 ## 🔍 Overview
 
