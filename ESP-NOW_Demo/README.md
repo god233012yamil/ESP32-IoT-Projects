@@ -177,8 +177,8 @@ This simple structure includes:
 #### Step 1: Clone the Repository
 
 ```bash
-git clone https://github.com/god233012yamil/esp_now_demo.git
-cd esp_now_demo
+git clone https://github.com/god233012yamil/ESP32-IoT-Projects/tree/98fc9056b674d83589774bfd33fff814d844c8ae/ESP-NOW_Demo.git
+cd ESP-NOW_Demo
 ```
 
 #### Step 2: Set Up ESP-IDF Environment
