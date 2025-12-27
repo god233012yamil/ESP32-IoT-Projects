@@ -177,8 +177,8 @@ This simple structure includes:
 #### Step 1: Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/espnow_beginner_espidf.git
-cd espnow_beginner_espidf
+git clone https://github.com/god233012yamil/esp_now_demo.git
+cd esp_now_demo
 ```
 
 #### Step 2: Set Up ESP-IDF Environment
