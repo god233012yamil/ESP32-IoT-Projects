@@ -1,0 +1,8 @@
+# Beginner-friendly defaults (can be overridden in menuconfig)
+
+# Increase log level to INFO by default
+CONFIG_LOG_DEFAULT_LEVEL_INFO=y
+CONFIG_LOG_DEFAULT_LEVEL=3
+
+# Make sure Wi-Fi is enabled
+CONFIG_ESP_WIFI_ENABLED=y

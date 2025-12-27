@@ -1,0 +1,30 @@
+menu "ESP-NOW Beginner Demo"
+
+config ESPNOW_ROLE_SENDER
+    bool "Build as Sender (transmitter)"
+    default y
+    help
+        If enabled, the firmware sends a small packet every second to the peer MAC.
+
+config ESPNOW_ROLE_RECEIVER
+    bool "Build as Receiver (gateway)"
+    default n
+    depends on !ESPNOW_ROLE_SENDER
+    help
+        If enabled, the firmware receives ESP-NOW packets and prints them.
+
+config ESPNOW_CHANNEL
+    int "ESP-NOW Wi-Fi channel (1-13)"
+    range 1 13
+    default 1
+    help
+        Both devices must use the same channel for ESP-NOW.
+
+config ESPNOW_PEER_MAC
+    string "Peer MAC address (format: AA:BB:CC:DD:EE:FF)"
+    default "FF:FF:FF:FF:FF:FF"
+    help
+        Destination MAC used by the sender.
+        Use FF:FF:FF:FF:FF:FF for broadcast (no pairing needed).
+
+endmenu
