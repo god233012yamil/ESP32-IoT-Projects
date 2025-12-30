@@ -68,7 +68,7 @@ The demo uses the following configurable parameters (defined in `main.c`):
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/QUEUE_Producer_Consumer_Demo.git
+git clone https://github.com/god233012yamil/ESP32-IoT-Projects/tree/b195a85b9dae5f177af7aa5f42bd302d5b9c9b26/QUEUE_Producer_Consumer_Demo.git
 cd QUEUE_Producer_Consumer_Demo
 ```
 
@@ -135,16 +135,16 @@ I (3349) queue_demo: Consumer got : seq=3 payload=30 age_ticks=0
 
 2. **Producer Task**:
    - Generates a new message every 1000 ms
-   - Increments sequence number
+   - Increments the sequence number
    - Captures current tick count
-   - Attempts to send message to queue with 50 ms timeout
+   - Attempts to send a message to the queue with a 50 ms timeout
    - Logs success or queue full condition
 
 3. **Consumer Task**:
-   - Waits for messages from the queue with 2000 ms timeout
+   - Waits for messages from the queue with a 2000 ms timeout
    - Processes received messages
    - Calculates message age (time spent in queue)
-   - Logs received data or timeout condition
+   - Logs received data or a timeout condition
 
 ### Task Priorities
 
@@ -172,16 +172,16 @@ This demo can be extended in various ways:
 ### Build Errors
 
 **Problem**: CMake configuration errors  
-**Solution**: Ensure ESP-IDF is properly installed and environment is sourced
+**Solution**: Ensure ESP-IDF is properly installed and the environment is sourced
 
 **Problem**: Compilation errors  
 **Solution**: Check that you're using ESP-IDF v4.4 or later
 
 ### Runtime Issues
 
-**Problem**: No output on serial monitor  
+**Problem**: No output on the serial monitor  
 **Solution**: 
-- Check the correct serial port is selected
+- Check that the correct serial port is selected
 - Verify baud rate (default 115200)
 - Press the RESET button on your ESP32 board
 
