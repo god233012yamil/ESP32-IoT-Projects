@@ -13,7 +13,7 @@ A clean, minimal touch screen demonstration for the WaveShare ESP32-C6-Touch-LCD
 
 ## 📋 Table of Contents
 
-- [Features](#features)
+- [Features](#-features)
 - [Hardware Requirements](#-hardware-requirements)
 - [Pin Configuration](#-pin-configuration)
 - [Software Requirements](#-software-requirements)

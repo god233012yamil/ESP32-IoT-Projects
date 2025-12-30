@@ -4,20 +4,20 @@ A minimal, well-documented ESP-NOW project for ESP32-S3 using ESP-IDF and FreeRT
 
 ## 📋 Table of Contents
 
-- [Overview](#overview)
-- [Features](#features)
-- [Hardware Requirements](#hardware-requirements)
-- [Software Requirements](#software-requirements)
-- [Project Structure](#project-structure)
-- [How It Works](#how-it-works)
-- [Getting Started](#getting-started)
-- [Configuration](#configuration)
-- [Building and Flashing](#building-and-flashing)
-- [Usage Examples](#usage-examples)
-- [Troubleshooting](#troubleshooting)
-- [Advanced Topics](#advanced-topics)
-- [Contributing](#contributing)
-- [License](#license)
+- [Overview](#-overview)
+- [Features](#-features)
+- [Hardware Requirements](#-hardware-requirements)
+- [Software Requirements](#-software-requirements)
+- [Project Structure](#-project-structure)
+- [How It Works](#-how-it-works)
+- [Getting Started](#-getting-started)
+- [Configuration](#-configuration)
+- [Building and Flashing](#-building-and-flashing)
+- [Usage Examples](#-usage-examples)
+- [Troubleshooting](#-troubleshooting)
+- [Advanced Topics](#-advanced-topics)
+- [Contributing](#-contributing)
+- [License](#-license)
 
 ## 🔍 Overview
 
@@ -177,8 +177,8 @@ This simple structure includes:
 #### Step 1: Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/espnow_beginner_espidf.git
-cd espnow_beginner_espidf
+git clone https://github.com/god233012yamil/ESP32-IoT-Projects/tree/98fc9056b674d83589774bfd33fff814d844c8ae/ESP-NOW_Demo.git
+cd ESP-NOW_Demo
 ```
 
 #### Step 2: Set Up ESP-IDF Environment
