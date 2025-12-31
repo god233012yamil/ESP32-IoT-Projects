@@ -1,0 +1,8 @@
+# Keep logs readable
+CONFIG_LOG_DEFAULT_LEVEL_INFO=y
+
+# FreeRTOS tick rate (default is usually fine; kept explicit for demos)
+CONFIG_FREERTOS_HZ=1000
+
+# Enable GPIO ISR service (driver uses it)
+CONFIG_GPIO_ISR_HANDLER_IN_IRAM=y
