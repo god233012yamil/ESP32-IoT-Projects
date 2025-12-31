@@ -9,22 +9,22 @@ A practical demonstration of FreeRTOS synchronization primitives on ESP32 using 
 
 ## 📋 Table of Contents
 
-- [Overview](-#overview)
-- [Features](-#features)
-- [Synchronization Patterns](-#synchronization-patterns)
-- [Hardware Requirements](-#hardware-requirements)
-- [Software Requirements](-#software-requirements)
-- [Project Structure](-#project-structure)
-- [Installation and Setup](-#installation-and-setup)
-- [Configuration](-#configuration)
-- [Building and Flashing](-#building-and-flashing)
-- [How It Works](-#how-it-works)
-- [Expected Output](-#expected-output)
-- [Flowchart](-#flowchart)
-- [Troubleshooting](-#troubleshooting)
-- [Learning Resources](-#learning-resources)
-- [Contributing](-#contributing)
-- [License](-#license)
+- [Overview](#-overview)
+- [Features](#-features)
+- [Synchronization Patterns](#-synchronization-patterns)
+- [Hardware Requirements](#-hardware-requirements)
+- [Software Requirements](#-software-requirements)
+- [Project Structure](#-project-structure)
+- [Installation and Setup](#-installation-and-setup)
+- [Configuration](#-configuration)
+- [Building and Flashing](#-building-and-flashing)
+- [How It Works](#-how-it-works)
+- [Expected Output](#-expected-output)
+- [Flowchart](#-flowchart)
+- [Troubleshooting](#-troubleshooting)
+- [Learning Resources](#-learning-resources)
+- [Contributing](#-contributing)
+- [License](#-license)
 
 ## 🎯 Overview
 
