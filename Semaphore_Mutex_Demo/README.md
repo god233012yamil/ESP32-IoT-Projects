@@ -143,7 +143,7 @@ cd esp-idf
 ### 2. Clone This Repository
 
 ```bash
-git clone https://github.com/yourusername/Semaphore_Mutex_Demo.git
+git clone https://github.com/god233012yamil/ESP32-IoT-Projects/tree/69a6a681dabe77456c0d2356aab738dbc6d8a6fd/Semaphore_Mutex_Demo.git
 cd Semaphore_Mutex_Demo
 ```
 
