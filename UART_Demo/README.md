@@ -13,17 +13,17 @@ A production-ready, event-driven UART communication framework for ESP32 microcon
 
 ## 📋 Table of Contents
 
-- [Architecture Overview](#architecture-overview)
-- [System Flow](#system-flow)
-- [Hardware Setup](#hardware-setup)
-- [Software Requirements](#software-requirements)
-- [Installation](#installation)
-- [Configuration](#configuration)
-- [Usage](#usage)
-- [Testing](#testing)
-- [API Reference](#api-reference)
-- [Troubleshooting](#troubleshooting)
-- [License](#license)
+- [Architecture Overview](#-architecture-overview)
+- [System Flow](#-system-flow)
+- [Hardware Setup](#-hardware-setup)
+- [Software Requirements](#-software-requirements)
+- [Installation](#-installation)
+- [Configuration](#-configuration)
+- [Usage](#-usage)
+- [Testing](#-testing)
+- [API Reference](#-api-reference)
+- [Troubleshooting](#-troubleshooting)
+- [License](#-license)
 
 ## 🏗️ Architecture Overview
 
@@ -32,8 +32,8 @@ The project implements a multi-task architecture with clear separation of concer
 ### Task Structure
 
 1. **UART RX Event Task** (Priority 12)
-   - Monitors UART driver event queue
-   - Reads incoming bytes from UART hardware buffer
+   - Monitors the UART driver event queue
+   - Reads incoming bytes from the UART hardware buffer
    - Forwards data to StreamBuffer for processing
    - Handles overflow and error conditions
 
@@ -45,7 +45,7 @@ The project implements a multi-task architecture with clear separation of concer
 
 3. **UART TX Task** (Priority 10)
    - Exclusive UART writer (prevents interleaving)
-   - Processes messages from TX queue
+   - Processes messages from the TX queue
    - Ensures transmission completion
    - Enables centralized flow control
 
@@ -114,12 +114,12 @@ graph TB
 ### Flow Description
 
 **Reception Path:**
-1. UART hardware receives data and triggers interrupt
-2. ESP-IDF driver stores data in RX buffer and posts event
+1. UART hardware receives data and triggers an interrupt
+2. ESP-IDF driver stores data in the RX buffer and posts an event
 3. RX Event Task wakes up and reads available bytes
 4. Data pushed to StreamBuffer for decoupling
 5. Parser Task pulls bytes and accumulates into lines
-6. Complete commands dispatched to handler
+6. Complete commands dispatched to the handler
 
 **Transmission Path:**
 1. Application enqueues message via `tx_send_str()`
@@ -176,7 +176,7 @@ Update `uart_config_t.flow_ctrl` in code to `UART_HW_FLOWCTRL_CTS_RTS` and wire 
 ### 1. Clone Repository
 
 ```bash
-git clone https://github.com/yourusername/esp32-uart-reference.git
+git clone https://github.com/god233012yamil/ESP32-IoT-Projects/tree/fdbe1418b4e006b121f21c976756555f468679f5/UART_Demo.git
 cd esp32-uart-reference
 ```
 
