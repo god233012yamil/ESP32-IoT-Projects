@@ -6,7 +6,7 @@ A production-ready, event-driven UART communication framework for ESP32 microcon
 
 - **Event-Driven Architecture**: Uses ESP-IDF UART driver event queue for efficient interrupt handling
 - **Burst Absorption**: Fast RX task with StreamBuffer handles high-speed data bursts without loss
-- **Decoupled Parsing**: Separate parser task converts byte stream to application commands
+- **Decoupled Parsing**: A separate parser task converts the byte stream to application commands
 - **Serialized TX**: Single TX task prevents output interleaving and enables easy flow control
 - **Overflow Protection**: Graceful handling of buffer overflows and UART errors
 - **Production-Ready**: Demonstrates patterns suitable for real-world IoT deployments
@@ -177,7 +177,7 @@ Update `uart_config_t.flow_ctrl` in code to `UART_HW_FLOWCTRL_CTS_RTS` and wire 
 
 ```bash
 git clone https://github.com/god233012yamil/ESP32-IoT-Projects/tree/fdbe1418b4e006b121f21c976756555f468679f5/UART_Demo.git
-cd esp32-uart-reference
+cd UART_Demo
 ```
 
 ### 2. Set Up ESP-IDF
