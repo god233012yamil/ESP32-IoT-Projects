@@ -1,0 +1,32 @@
+menu "Scheduling Model Demo"
+
+choice DEMO_MODE
+    prompt "Demo mode"
+    default DEMO_MODE_PREEMPTIVE
+    help
+        Select which execution model is demonstrated.
+
+config DEMO_MODE_PREEMPTIVE
+    bool "Preemptive (FreeRTOS tasks)"
+    help
+        Demonstrates preemptive scheduling with multiple tasks and priorities.
+
+config DEMO_MODE_COOPERATIVE
+    bool "Cooperative (run-to-completion event loop)"
+    help
+        Demonstrates a cooperative, run-to-completion event loop in a single task.
+endchoice
+
+config COOP_EVENT_QUEUE_LEN
+    int "Cooperative event queue length"
+    range 4 64
+    default 16
+    depends on DEMO_MODE_COOPERATIVE
+
+config COOP_TIMER_PERIOD_MS
+    int "Cooperative timer period (ms)"
+    range 50 5000
+    default 250
+    depends on DEMO_MODE_COOPERATIVE
+
+endmenu
