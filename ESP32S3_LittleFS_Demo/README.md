@@ -4,19 +4,19 @@ A comprehensive ESP-IDF project demonstrating LittleFS filesystem operations on 
 
 ## 📋 Table of Contents
 
-- [Overview](#overview)
-- [Features](#features)
-- [Hardware Requirements](#hardware-requirements)
-- [Software Requirements](#software-requirements)
-- [Project Structure](#project-structure)
-- [Partition Table](#partition-table)
-- [Configuration](#configuration)
-- [Building and Flashing](#building-and-flashing)
-- [How It Works](#how-it-works)
-- [Program Flow](#program-flow)
-- [Expected Output](#expected-output)
-- [API Reference](#api-reference)
-- [Troubleshooting](#troubleshooting)
+- [Overview](#-overview)
+- [Features](#-features)
+- [Hardware Requirements](#-hardware-requirements)
+- [Software Requirements](#-software-requirements)
+- [Project Structure](#-project-structure)
+- [Partition Table](#-partition-table)
+- [Configuration](#-configuration)
+- [Building and Flashing](#-building-and-flashing)
+- [How It Works](#-how-it-works)
+- [Program Flow](#-program-flow)
+- [Expected Output](#-expected-output)
+- [API Reference](#-api-reference)
+- [Troubleshooting](#-troubleshooting)
 - [License](#license)
 
 ## 🔍 Overview
