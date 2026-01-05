@@ -172,7 +172,7 @@ esp_vfs_littlefs_register(&conf);
 
 - **base_path**: Mount point in the virtual filesystem (`/littlefs`)
 - **partition_label**: Matches the partition name in `partitions.csv`
-- **format_if_mount_failed**: Auto-formats if partition is corrupted or unformatted
+- **format_if_mount_failed**: Auto-formats if the partition is corrupted or unformatted
 
 ### 2. **Directory Creation**
 
@@ -361,19 +361,19 @@ Displays filesystem usage statistics (total, used, free space).
 **Problem**: `fopen` or `fwrite` failures
 
 **Solutions**:
-1. Ensure filesystem is mounted before file operations
+1. Ensure the filesystem is mounted before file operations
 2. Check available space with `show_fs_info()`
 3. Verify file paths don't exceed `CONFIG_LITTLEFS_OBJ_NAME_LEN`
 4. Check that parent directories exist
 
 ### Build Errors
 
-**Problem**: Cannot find LittleFS component
+**Problem**: Cannot find the LittleFS component
 
 **Solutions**:
 1. Ensure `idf_component.yml` is present in `main/` directory
 2. Run `idf.py reconfigure` to refresh dependencies
-3. Check internet connection for component download
+3. Check the internet connection for component download
 4. Manually install: `idf.py add-dependency "joltwallet/littlefs^1.20.0"`
 
 ### Serial Port Issues
@@ -383,8 +383,8 @@ Displays filesystem usage statistics (total, used, free space).
 **Solutions**:
 1. Install CP210x or CH340 drivers
 2. Verify port with `idf.py -p PORT monitor`
-3. Press BOOT button while connecting
-4. Check USB cable supports data transfer
+3. Press the BOOT button while connecting
+4. Check the USB cable supports data transfer
 
 ## 📖 Additional Resources
 
