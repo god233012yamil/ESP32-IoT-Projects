@@ -1,0 +1,141 @@
+name: ESP-IDF Build CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        idf_ver: [release-v5.0, release-v5.1, release-v5.2, latest]
+        idf_target: [esp32s3]
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        submodules: 'recursive'
+    
+    - name: Setup ESP-IDF
+      uses: espressif/esp-idf-ci-action@v1
+      with:
+        esp_idf_version: ${{ matrix.idf_ver }}
+        target: ${{ matrix.idf_target }}
+    
+    - name: Build project
+      run: |
+        . ${IDF_PATH}/export.sh
+        idf.py build
+    
+    - name: Check for generated files
+      run: |
+        if [ ! -f "main/esp_efuse_custom_table.c" ]; then
+          echo "Error: esp_efuse_custom_table.c not generated!"
+          exit 1
+        fi
+        if [ ! -f "main/include/esp_efuse_custom_table.h" ]; then
+          echo "Error: esp_efuse_custom_table.h not generated!"
+          exit 1
+        fi
+        echo "✅ All generated files present"
+    
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: firmware-${{ matrix.idf_ver }}-${{ matrix.idf_target }}
+        path: |
+          build/*.bin
+          build/*.elf
+          build/*.map
+        retention-days: 7
+    
+    - name: Check code size
+      run: |
+        . ${IDF_PATH}/export.sh
+        idf.py size
+    
+    - name: Archive generated eFuse files
+      uses: actions/upload-artifact@v4
+      with:
+        name: generated-efuse-files-${{ matrix.idf_ver }}
+        path: |
+          main/esp_efuse_custom_table.c
+          main/include/esp_efuse_custom_table.h
+        retention-days: 7
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Check file formatting
+      run: |
+        # Check for tabs (should use spaces)
+        if grep -r $'\t' main/*.c main/*.h; then
+          echo "Error: Found tabs in source files. Please use spaces."
+          exit 1
+        fi
+        
+        # Check for trailing whitespace
+        if grep -r ' $' main/*.c main/*.h; then
+          echo "Warning: Found trailing whitespace in source files."
+        fi
+        
+        echo "✅ Basic formatting checks passed"
+    
+    - name: Validate CSV format
+      run: |
+        # Check CSV header
+        if ! head -n 1 main/esp_efuse_custom_table.csv | grep -q "field_name"; then
+          echo "Error: CSV missing proper header"
+          exit 1
+        fi
+        
+        # Check for valid block names
+        if grep -v "^#" main/esp_efuse_custom_table.csv | grep -v "^$" | grep -v "EFUSE_BLK"; then
+          echo "Warning: Check block names in CSV"
+        fi
+        
+        echo "✅ CSV validation passed"
+
+  documentation:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Check documentation
+      run: |
+        # Check if README exists and is not empty
+        if [ ! -s "README.md" ]; then
+          echo "Error: README.md missing or empty"
+          exit 1
+        fi
+        
+        # Check for common documentation sections
+        for section in "Prerequisites" "Build" "Flash" "License"; do
+          if ! grep -q "$section" README.md; then
+            echo "Warning: README may be missing $section section"
+          fi
+        done
+        
+        echo "✅ Documentation checks passed"
+    
+    - name: Validate Mermaid diagrams
+      run: |
+        # Check if flowcharts file exists
+        if [ -f "FLOWCHARTS.md" ]; then
+          # Check for valid mermaid blocks
+          if ! grep -q '```mermaid' FLOWCHARTS.md; then
+            echo "Warning: FLOWCHARTS.md may not contain Mermaid diagrams"
+          else
+            echo "✅ Mermaid diagrams found"
+          fi
+        else
+          echo "Warning: FLOWCHARTS.md not found"
+        fi

@@ -1,0 +1,10 @@
+menu "Custom eFuse Demo"
+
+config DEMO_PROGRAM_EFUSE
+    bool "Program custom eFuse fields on boot"
+    default y
+    help
+        If enabled, the demo will attempt to burn the custom fields on boot.
+        This is irreversible when virtual eFuses are disabled.
+
+endmenu

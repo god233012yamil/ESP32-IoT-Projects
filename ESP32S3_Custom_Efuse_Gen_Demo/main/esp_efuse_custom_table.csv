@@ -1,0 +1,9 @@
+# field_name,efuse_block,bit_start,bit_count,comment
+#
+# Custom user fields on ESP32-S3.
+# EFUSE_BLK3 is reserved as USER_DATA in the common table, so define child fields.
+
+USER_DATA.SERIAL_NUMBER,EFUSE_BLK3,0,128,Device serial number (16 bytes ASCII, zero-padded)
+USER_DATA.HW_REV,EFUSE_BLK3,128,16,Hardware revision (uint16)
+USER_DATA.FEATURE_FLAGS,EFUSE_BLK3,144,32,Feature flags (uint32)
+USER_DATA.PROVISIONING_CRC16,EFUSE_BLK3,176,16,CRC16 over SERIAL_NUMBER+HW_REV+FEATURE_FLAGS

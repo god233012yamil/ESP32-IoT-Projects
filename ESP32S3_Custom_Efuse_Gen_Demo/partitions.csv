@@ -1,0 +1,11 @@
+# Name,   Type, SubType, Offset,   Size,     Flags
+# Notes:
+# - This table is compatible with the default 8MB flash size.
+# - The "efuse" data partition is required when CONFIG_EFUSE_VIRTUAL_KEEP_IN_FLASH=y.
+# - The factory app remains at the standard 0x10000 offset.
+
+nvs,      data, nvs,     0x9000,   0x6000,
+phy_init, data, phy,     0xf000,   0x1000,
+factory,  app,  factory, 0x10000,  0x100000,
+# Virtual eFuses storage (used only when eFuse virtual keep-in-flash is enabled)
+efuse,    data, efuse,   0x110000, 0x2000,

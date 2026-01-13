@@ -1,0 +1,34 @@
+# ESP-IDF Build System
+build/
+sdkconfig
+sdkconfig.old
+*.pyc
+
+# Generated eFuse files (these are auto-generated during build)
+main/esp_efuse_custom_table.c
+main/include/esp_efuse_custom_table.h
+
+# Virtual eFuse data (emulator state)
+*.bin
+efuse_em.bin
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Python virtual environments
+venv/
+env/
+.venv/
+
+# Logs
+*.log
+
+# Dependencies
+dependencies.lock
+dependencies/
+managed_components/

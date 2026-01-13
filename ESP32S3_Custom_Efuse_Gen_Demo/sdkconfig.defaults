@@ -1,0 +1,11 @@
+# Demo defaults: keep virtual eFuses enabled to avoid permanent burns while testing.
+CONFIG_EFUSE_VIRTUAL=y
+CONFIG_EFUSE_VIRTUAL_KEEP_IN_FLASH=y
+
+# Virtual eFuses stored in flash require an "efuse" data partition.
+# This project uses a custom partition table that includes it.
+CONFIG_PARTITION_TABLE_CUSTOM=y
+CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions.csv"
+
+# More console output.
+CONFIG_LOG_DEFAULT_LEVEL_INFO=y
