@@ -1,0 +1,65 @@
+menu "Low-Power Reference Project"
+
+config LP_REPORT_PERIOD_SEC
+    int "Report period in seconds (deep sleep timer)"
+    range 5 86400
+    default 300
+    help
+        The device wakes up on this timer, performs a short work burst, then
+        returns to deep sleep.
+
+config LP_ENABLE_GPIO_WAKE
+    bool "Enable GPIO wake (EXT0)"
+    default y
+    help
+        Enables wakeup via an external GPIO using EXT0.
+
+config LP_WAKE_GPIO
+    int "Wake GPIO number"
+    default 0
+    depends on LP_ENABLE_GPIO_WAKE
+    help
+        GPIO used for EXT0 wake. Common dev boards use GPIO0 (BOOT button).
+
+config LP_WAKE_LEVEL
+    int "Wake level (0 or 1)"
+    range 0 1
+    default 0
+    depends on LP_ENABLE_GPIO_WAKE
+    help
+        EXT0 wake triggers when the RTC GPIO matches this level.
+
+config LP_ENABLE_WIFI
+    bool "Enable Wi-Fi connect/transmit/disconnect demo"
+    default n
+    help
+        If enabled, the firmware will connect to Wi-Fi, perform a minimal
+        TCP transaction, then shut Wi-Fi down before sleeping.
+
+if LP_ENABLE_WIFI
+
+config LP_WIFI_SSID
+    string "Wi-Fi SSID"
+    default "your_ssid"
+
+config LP_WIFI_PASSWORD
+    string "Wi-Fi Password"
+    default "your_password"
+
+config LP_WIFI_CONNECT_TIMEOUT_MS
+    int "Wi-Fi connect timeout (ms)"
+    range 1000 60000
+    default 15000
+
+config LP_WIFI_TX_HOST
+    string "Demo host to connect"
+    default "example.com"
+
+config LP_WIFI_TX_PORT
+    int "Demo port"
+    range 1 65535
+    default 80
+
+endif
+
+endmenu

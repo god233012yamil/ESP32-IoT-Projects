@@ -1,0 +1,12 @@
+# Reasonable defaults for a low-power reference project.
+# You can override anything via menuconfig.
+
+CONFIG_FREERTOS_HZ=100
+CONFIG_LOG_DEFAULT_LEVEL_WARN=y
+CONFIG_LOG_DEFAULT_LEVEL=2
+
+# Enable power management framework (required for DFS/light sleep integration).
+CONFIG_PM_ENABLE=y
+
+# Reduce console noise in production-like builds.
+CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG_ENABLED=n
