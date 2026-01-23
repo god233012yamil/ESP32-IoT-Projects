@@ -17,7 +17,7 @@ This project demonstrates five critical power optimization techniques:
 
 ## 📊 System Architecture
 
-\`\`\`mermaid
+```mermaid
 flowchart TD
     A[Power On / Reset] --> B[app_main]
     B --> C[Enable Power Management<br/>DFS + Light Sleep]
@@ -36,7 +36,7 @@ flowchart TD
     
     M --> N{Wi-Fi Enabled?}
     N -->|Yes| O[wifi_manager_connect]
-    N -->|No| Q
+    N -->|No| Q[Skip Wi-Fi]
     
     O --> P{Connected?}
     P -->|Yes| Q[wifi_manager_demo_tx<br/>TCP Transaction]
@@ -57,11 +57,11 @@ flowchart TD
     Y --> Z[Task Blocks Again]
     Z -.-> W
     
-    style T fill:#ff6b6b
-    style C fill:#4ecdc4
-    style O fill:#ffe66d
-    style I fill:#95e1d3
-\`\`\`
+    style T fill:#ff6b6b,stroke:#c92a2a,color:#fff
+    style C fill:#4ecdc4,stroke:#099268,color:#000
+    style O fill:#ffe66d,stroke:#f59f00,color:#000
+    style I fill:#95e1d3,stroke:#0ca678,color:#000
+```
 
 ## 🔋 Power Consumption Profile
 
@@ -87,22 +87,22 @@ The firmware is optimized for the following power states:
 ### Build and Flash
 
 1. **Clone the repository**
-\`\`\`bash
+```bash
 git clone https://github.com/yourusername/esp32-low-power-reference.git
 cd esp32-low-power-reference
-\`\`\`
+```
 
 2. **Set your target chip**
-\`\`\`bash
+```bash
 idf.py set-target esp32
-\`\`\`
+```
 
 3. **Configure the project**
-\`\`\`bash
+```bash
 idf.py menuconfig
-\`\`\`
+```
 
-Navigate to \`Low-Power Reference Project\` and configure:
+Navigate to `Low-Power Reference Project` and configure:
 - **Report period in seconds** (default: 300) - How often to wake and report
 - **Enable GPIO wake (EXT0)** - Allow button press to wake from deep sleep
 - **Wake GPIO number** (default: 0) - GPIO0 is the BOOT button on most dev boards
@@ -110,16 +110,16 @@ Navigate to \`Low-Power Reference Project\` and configure:
   - If enabled, set your SSID, password, and test host/port
 
 4. **Build, flash, and monitor**
-\`\`\`bash
+```bash
 idf.py build flash monitor
-\`\`\`
+```
 
 5. **Exit the monitor**
-Press \`Ctrl+]\` to exit the monitor
+Press `Ctrl+]` to exit the monitor
 
 ## 📁 Project Structure
 
-\`\`\`
+```
 esp32-low-power-reference/
 ├── main/
 │   ├── main.c                    # Core application logic
@@ -133,7 +133,7 @@ esp32-low-power-reference/
 ├── CMakeLists.txt                # Project CMake configuration
 ├── sdkconfig.defaults            # Default SDK configuration
 └── README.md                     # This file
-\`\`\`
+```
 
 ## 🔍 How It Works
 
@@ -141,11 +141,11 @@ esp32-low-power-reference/
 
 The firmware follows a strict duty-cycle pattern:
 
-\`\`\`
+```
 ┌─────────────────────────────────────────────────┐
 │ WAKE → Work Burst (< 1s) → SLEEP (5-300s)      │
 └─────────────────────────────────────────────────┘
-\`\`\`
+```
 
 1. **Wake Up** - Device wakes from deep sleep via timer or GPIO
 2. **Work Burst** - Executes critical tasks in minimal time:
@@ -158,9 +158,9 @@ The firmware follows a strict duty-cycle pattern:
 
 ### Event-Driven Task Pattern
 
-The \`button_task\` demonstrates proper FreeRTOS power management:
+The `button_task` demonstrates proper FreeRTOS power management:
 
-\`\`\`c
+```c
 static void button_task(void *arg) {
     while (1) {
         // Task blocks here - CPU can sleep
@@ -170,27 +170,26 @@ static void button_task(void *arg) {
         do_work_burst();
     }
 }
-\`\`\`
+```
 
 **Key Points:**
-- Task blocks indefinitely using \`portMAX_DELAY\`
+- Task blocks indefinitely using `portMAX_DELAY`
 - No polling loops or periodic checks
-- ISR wakes task via \`vTaskNotifyGiveFromISR()\`
+- ISR wakes task via `vTaskNotifyGiveFromISR()`
 - Allows automatic light sleep during idle periods
-
 
 ### Power Management Configuration
 
 ESP-IDF power management enables automatic frequency scaling and light sleep:
 
-\`\`\`c
+```c
 esp_pm_config_t cfg = {
     .max_freq_mhz = 240,           // Full speed when needed
     .min_freq_mhz = 40,            // Scale down during light loads
     .light_sleep_enable = true,    // Auto light sleep when idle
 };
 esp_pm_configure(&cfg);
-\`\`\`
+```
 
 The system automatically:
 - Reduces CPU frequency during low computational load
@@ -201,7 +200,7 @@ The system automatically:
 
 The Wi-Fi manager follows a strict connect-transmit-disconnect pattern:
 
-\`\`\`c
+```c
 // 1. Connect with timeout
 wifi_manager_connect(15000);
 
@@ -210,7 +209,7 @@ wifi_manager_demo_tx("api.example.com", 443, 3000);
 
 // 3. Immediately shutdown
 wifi_manager_shutdown();
-\`\`\`
+```
 
 **Why This Matters:**
 - Wi-Fi radio is the largest power consumer (~120-170 mA)
@@ -223,26 +222,26 @@ wifi_manager_shutdown();
 Two wake sources are configured:
 
 1. **Timer Wake** (always enabled)
-\`\`\`c
+```c
 esp_sleep_enable_timer_wakeup(CONFIG_LP_REPORT_PERIOD_SEC * 1000000ULL);
-\`\`\`
+```
 
 2. **GPIO Wake** (optional, EXT0)
-\`\`\`c
+```c
 esp_sleep_enable_ext0_wakeup(GPIO_NUM_0, 0);  // Wake on low level
-\`\`\`
+```
 
 The firmware logs the wake cause on each boot for debugging:
-\`\`\`c
+```c
 esp_sleep_wakeup_cause_t cause = esp_sleep_get_wakeup_cause();
 // ESP_SLEEP_WAKEUP_TIMER, ESP_SLEEP_WAKEUP_EXT0, etc.
-\`\`\`
+```
 
 ### Sensor Power Gating
 
 External sensors often consume more power than the ESP32 itself. The project demonstrates power gating:
 
-\`\`\`c
+```c
 // Power on sensor
 gpio_set_level(GPIO_SENSOR_PWR, 1);
 vTaskDelay(pdMS_TO_TICKS(10));  // Settling time
@@ -252,38 +251,38 @@ int sensor_value = read_sensor_adc();
 
 // Power off sensor
 gpio_set_level(GPIO_SENSOR_PWR, 0);
-\`\`\`
+```
 
 Using a load switch (e.g., TPS22916) controlled by GPIO allows complete sensor shutdown during sleep.
 
 ## ⚙️ Configuration Options
 
-All options are configurable via \`idf.py menuconfig\` under \`Low-Power Reference Project\`:
+All options are configurable via `idf.py menuconfig` under `Low-Power Reference Project`:
 
 | Option | Default | Description |
 |--------|---------|-------------|
-| \`LP_REPORT_PERIOD_SEC\` | 300 | Deep sleep duration between wake cycles |
-| \`LP_ENABLE_GPIO_WAKE\` | Yes | Enable wake from GPIO button press |
-| \`LP_WAKE_GPIO\` | 0 | GPIO number for EXT0 wake (BOOT button) |
-| \`LP_WAKE_LEVEL\` | 0 | GPIO level that triggers wake (0=low, 1=high) |
-| \`LP_ENABLE_WIFI\` | No | Enable Wi-Fi connectivity demo |
-| \`LP_WIFI_SSID\` | "" | Your Wi-Fi network name |
-| \`LP_WIFI_PASSWORD\` | "" | Your Wi-Fi password |
-| \`LP_WIFI_CONNECT_TIMEOUT_MS\` | 15000 | Maximum time to wait for connection |
-| \`LP_WIFI_TX_HOST\` | "example.com" | Host for demo TCP connection |
-| \`LP_WIFI_TX_PORT\` | 80 | Port for demo TCP connection |
+| `LP_REPORT_PERIOD_SEC` | 300 | Deep sleep duration between wake cycles |
+| `LP_ENABLE_GPIO_WAKE` | Yes | Enable wake from GPIO button press |
+| `LP_WAKE_GPIO` | 0 | GPIO number for EXT0 wake (BOOT button) |
+| `LP_WAKE_LEVEL` | 0 | GPIO level that triggers wake (0=low, 1=high) |
+| `LP_ENABLE_WIFI` | No | Enable Wi-Fi connectivity demo |
+| `LP_WIFI_SSID` | "" | Your Wi-Fi network name |
+| `LP_WIFI_PASSWORD` | "" | Your Wi-Fi password |
+| `LP_WIFI_CONNECT_TIMEOUT_MS` | 15000 | Maximum time to wait for connection |
+| `LP_WIFI_TX_HOST` | "example.com" | Host for demo TCP connection |
+| `LP_WIFI_TX_PORT` | 80 | Port for demo TCP connection |
 
 ## 📝 Expected Behavior
 
 After flashing, you should see:
 
-\`\`\`
+```
 I (345) lp_ref: wakeup cause=0
 W (356) lp_ref: sample: adc_mv=1830
 I (357) wifi_mgr: connected
 I (2435) wifi_mgr: demo tx ok
 W (2486) lp_ref: entering deep sleep (300 s)
-\`\`\`
+```
 
 The device will:
 1. Wake up (first boot shows cause=0)
@@ -294,7 +293,6 @@ The device will:
 6. Repeat on timer wake or GPIO wake
 
 Press the BOOT button (GPIO0) to trigger an immediate wake and work burst.
-
 
 ## 🔬 Measuring Power Consumption
 
@@ -349,7 +347,7 @@ On a well-designed custom PCB:
 
 For a 2000 mAh Li-ion battery with 300-second wake cycle:
 
-\`\`\`
+```
 Work burst: 1 second @ 80 mA (with Wi-Fi TX)
 Deep sleep: 299 seconds @ 20 µA
 
@@ -358,15 +356,15 @@ Average current = (1s × 80mA + 299s × 0.02mA) / 300s
                 = 0.287 mA
 
 Battery life = 2000 mAh / 0.287 mA = 6968 hours = 290 days
-\`\`\`
+```
 
 ## 🛠️ Customization for Your Application
 
 ### Replace the Demo Sensor Code
 
-In \`main.c\`, modify the \`do_work_burst()\` function:
+In `main.c`, modify the `do_work_burst()` function:
 
-\`\`\`c
+```c
 static void do_work_burst(void)
 {
     // Your sensor initialization
@@ -388,13 +386,13 @@ static void do_work_burst(void)
     wifi_manager_shutdown();
     #endif
 }
-\`\`\`
+```
 
 ### Replace the Demo Network Code
 
-In \`wifi_manager.c\`, replace \`wifi_manager_demo_tx()\` with your protocol:
+In `wifi_manager.c`, replace `wifi_manager_demo_tx()` with your protocol:
 
-\`\`\`c
+```c
 esp_err_t send_sensor_data(float temp, float humidity) {
     // MQTT example
     esp_mqtt_client_config_t mqtt_cfg = { ... };
@@ -403,7 +401,7 @@ esp_err_t send_sensor_data(float temp, float humidity) {
     
     char payload[128];
     snprintf(payload, sizeof(payload), 
-             "{\\"temp\\":%.2f,\\"humidity\\":%.2f}", temp, humidity);
+             "{\"temp\":%.2f,\"humidity\":%.2f}", temp, humidity);
     
     esp_mqtt_client_publish(client, "sensors/data", payload, 0, 1, 0);
     
@@ -413,11 +411,11 @@ esp_err_t send_sensor_data(float temp, float humidity) {
     esp_mqtt_client_destroy(client);
     return ESP_OK;
 }
-\`\`\`
+```
 
 ### Adjust Sleep Duration Dynamically
 
-\`\`\`c
+```c
 // Sleep for different durations based on conditions
 uint64_t sleep_time_us;
 
@@ -431,8 +429,7 @@ if (battery_low) {
 
 esp_sleep_enable_timer_wakeup(sleep_time_us);
 esp_deep_sleep_start();
-\`\`\`
-
+```
 
 ## 🐛 Troubleshooting
 
@@ -445,11 +442,11 @@ esp_deep_sleep_start();
 - Timer wake duration is reasonable (not too short)
 
 **Debug:**
-\`\`\`c
+```c
 // Add before entering deep sleep
 ESP_LOGI(TAG, "Enabled wake sources: 0x%x", 
          esp_sleep_get_wakeup_cause());
-\`\`\`
+```
 
 ### High Deep Sleep Current
 
@@ -460,14 +457,14 @@ ESP_LOGI(TAG, "Enabled wake sources: 0x%x",
 - GPIO pins in incorrect state (floating or driving loads)
 
 **Solution:**
-\`\`\`c
+```c
 // Before deep sleep, set all GPIOs to high-impedance
 for (int i = 0; i < GPIO_NUM_MAX; i++) {
     if (i != GPIO_WAKE_PIN && i != GPIO_SENSOR_PWR) {
         gpio_reset_pin(i);
     }
 }
-\`\`\`
+```
 
 ### Wi-Fi Connection Fails
 
@@ -478,25 +475,25 @@ for (int i = 0; i < GPIO_NUM_MAX; i++) {
 - Router allows new connections
 
 **Increase timeout:**
-\`\`\`bash
+```bash
 idf.py menuconfig
 # Set LP_WIFI_CONNECT_TIMEOUT_MS to 30000
-\`\`\`
+```
 
 ### Brown-out Detector Resets
 
 **Symptom:**
-\`\`\`
+```
 Brownout detector was triggered
-\`\`\`
+```
 
 **Cause:** Power supply cannot handle Wi-Fi TX peaks (170-240 mA)
 
 **Solutions:**
 1. Use larger power supply or battery
 2. Add bulk capacitance (100-220 µF) near ESP32
-3. Reduce \`CONFIG_ESP_PHY_MAX_WIFI_TX_POWER\` in menuconfig
-4. Disable Wi-Fi for testing: \`CONFIG_LP_ENABLE_WIFI=n\`
+3. Reduce `CONFIG_ESP_PHY_MAX_WIFI_TX_POWER` in menuconfig
+4. Disable Wi-Fi for testing: `CONFIG_LP_ENABLE_WIFI=n`
 
 ## 📚 Further Reading
 
