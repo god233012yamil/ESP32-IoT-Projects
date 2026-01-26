@@ -1,0 +1,42 @@
+# ESP-IDF build artifacts
+build/
+sdkconfig
+sdkconfig.old
+*.pyc
+*.pyo
+__pycache__/
+
+# Python virtual environment
+venv/
+.venv/
+env/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Compiled files
+*.o
+*.a
+*.so
+*.exe
+
+# Dependencies
+dependencies.lock
+managed_components/
+
+# Logs
+*.log
+
+# Private keys and certificates (keep examples, ignore real keys)
+# Comment out these lines if you want to version control your keys
+# secure_boot_signing_key.pem
+# main/server_root_cert.pem
+
+# Backup files
+*.bak
+*.backup

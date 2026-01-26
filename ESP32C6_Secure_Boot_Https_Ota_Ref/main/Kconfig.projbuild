@@ -1,0 +1,47 @@
+menu "Secure OTA Reference (app settings)"
+
+config APP_WIFI_SSID
+    string "Wi-Fi SSID"
+    default ""
+
+config APP_WIFI_PASSWORD
+    string "Wi-Fi password"
+    default ""
+
+config APP_OTA_FIRMWARE_URL
+    string "HTTPS firmware URL"
+    default "https://example.com/firmware/esp32c6_secure_boot_https_ota_ref.bin"
+
+config APP_OTA_TRIGGER_URL
+    string "HTTPS trigger URL (optional)"
+    default ""
+
+config APP_OTA_ALLOW_WITHOUT_TIME
+    bool "Allow OTA if time is not synced"
+    default y
+
+config APP_OTA_MAINT_START_HOUR
+    int "Maintenance window start hour (0-23)"
+    default 2
+
+config APP_OTA_MAINT_END_HOUR
+    int "Maintenance window end hour (0-23)"
+    default 5
+
+config APP_BATT_MIN_MV
+    int "Minimum battery level (mV) required to start OTA"
+    default 3600
+
+config APP_BATT_FAKE_MV
+    int "Battery level used by the demo (mV)"
+    default 4200
+
+config APP_OTA_BUTTON_GPIO
+    int "GPIO for OTA button (active-low with pull-up)"
+    default 9
+
+config APP_OTA_POLL_PERIOD_MS
+    int "OTA decision loop period (ms)"
+    default 2000
+
+endmenu
