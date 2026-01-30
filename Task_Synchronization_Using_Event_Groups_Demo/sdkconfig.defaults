@@ -1,0 +1,3 @@
+# Keep logs visible during demo
+CONFIG_LOG_DEFAULT_LEVEL_INFO=y
+CONFIG_LOG_MAXIMUM_LEVEL_INFO=y

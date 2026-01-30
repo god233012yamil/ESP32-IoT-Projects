@@ -1,0 +1,14 @@
+{
+  "idf.espIdfPathWin": "C:\\Users\\YankiMainDesk\\esp\\v5.4.1\\esp-idf",
+  "idf.toolsPathWin": "C:\\Users\\YankiMainDesk\\.espressif",
+  "idf.pythonInstallPath": "C:\\Users\\YankiMainDesk\\.espressif\\tools\\idf-python\\3.11.2\\python.exe",
+  "idf.flashType": "UART",
+  "idf.portWin": "COM15",
+  "idf.monitorPort": "COM15",
+  "idf.openOcdConfigs": [
+    "board/esp32s3-builtin.cfg"
+  ],
+  "idf.customExtraVars": {
+    "IDF_TARGET": "esp32s3"
+  }
+}
