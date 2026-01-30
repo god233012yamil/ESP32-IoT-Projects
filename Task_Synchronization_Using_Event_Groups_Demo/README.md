@@ -228,7 +228,7 @@ If you haven't set up ESP-IDF yet:
 
 ```bash
 # Clone ESP-IDF
-git clone --recursive https://github.com/espressif/esp-idf.git
+git clone --recursive https://github.com/god233012yamil/ESP32-IoT-Projects/tree/main/Task_Synchronization_Using_Event_Groups_Demo.git
 cd esp-idf
 
 # Install toolchain (Linux/macOS)
