@@ -1,0 +1,5 @@
+# Optional defaults for this project.
+# You can adjust logging verbosity here if desired.
+
+CONFIG_LOG_DEFAULT_LEVEL_INFO=y
+CONFIG_LOG_MAXIMUM_LEVEL_INFO=y
