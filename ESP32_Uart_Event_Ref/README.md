@@ -167,7 +167,7 @@ For ESP-IDF installation instructions, visit: [ESP-IDF Getting Started Guide](ht
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/yourusername/esp32-uart-event-ref.git
+   git clone https://github.com/god233012yamil/ESP32-IoT-Projects/tree/main/ESP32_Uart_Event_Ref.git
    cd esp32-uart-event-ref
    ```
 
