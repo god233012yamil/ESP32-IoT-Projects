@@ -1,0 +1,53 @@
+menu "Power Gating Demo"
+
+choice PG_TECHNIQUE
+    prompt "Power gating technique"
+    default PG_TECH_REG_EN
+    help
+        Select the hardware technique used to gate an external rail.
+
+config PG_TECH_REG_EN
+    bool "Regulator EN pin (GPIO -> EN)"
+
+config PG_TECH_LOAD_SWITCH
+    bool "Load switch (GPIO -> load switch EN)"
+
+config PG_TECH_PFET_DRIVER
+    bool "PFET high-side with driver (GPIO -> gate driver EN)"
+
+endchoice
+
+config PG_ENABLE_GPIO
+    int "Enable GPIO (controls EN / load switch / driver)"
+    default 10
+    range 0 30
+
+config PG_ACTIVE_HIGH
+    bool "Enable is active high"
+    default y
+
+config PG_STABILIZE_MS
+    int "Rail stabilize delay (ms)"
+    default 5
+    range 0 1000
+
+config PG_WAKE_INTERVAL_S
+    int "Wake interval (seconds)"
+    default 60
+    range 1 86400
+
+config PG_BUS_I2C_SCL_GPIO
+    int "I2C SCL GPIO (bus safe state)"
+    default 8
+    range 0 30
+
+config PG_BUS_I2C_SDA_GPIO
+    int "I2C SDA GPIO (bus safe state)"
+    default 9
+    range 0 30
+
+config PG_LOG_SAMPLE
+    bool "Log sample value each cycle"
+    default y
+
+endmenu
