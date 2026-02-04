@@ -1,0 +1,28 @@
+menu "SMP IPC Demo"
+    choice SMP_IPC_DEMO_MODE
+        prompt "Demo mode"
+        default SMP_IPC_DEMO_MODE_QUEUE
+        help
+            Select which inter-core IPC demo runs in app_main().
+
+        config SMP_IPC_DEMO_MODE_QUEUE
+            bool "Queue (payload passing)"
+
+        config SMP_IPC_DEMO_MODE_NOTIFY
+            bool "Task notifications (signaling)"
+    endchoice
+
+    config SMP_IPC_PRODUCER_CORE
+        int "Producer core ID"
+        range 0 1
+        default 0
+        help
+            Core ID used for producer task pinning.
+
+    config SMP_IPC_CONSUMER_CORE
+        int "Consumer core ID"
+        range 0 1
+        default 1
+        help
+            Core ID used for consumer task pinning.
+endmenu
