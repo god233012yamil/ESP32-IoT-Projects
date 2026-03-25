@@ -1,0 +1,23 @@
+# Build output
+build/
+sdkconfig
+sdkconfig.old
+*.o
+*.elf
+*.bin
+*.map
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Python
+__pycache__/
+*.pyc
+
+# Dependencies
+managed_components/
+dependencies.lock

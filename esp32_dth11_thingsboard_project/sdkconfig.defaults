@@ -1,0 +1,18 @@
+# Target configuration
+CONFIG_IDF_TARGET="esp32s3"
+
+# WiFi configuration
+CONFIG_ESP_WIFI_SSID=""
+CONFIG_ESP_WIFI_PASSWORD=""
+
+# FreeRTOS configuration
+CONFIG_FREERTOS_HZ=1000
+
+# Log configuration
+CONFIG_LOG_DEFAULT_LEVEL_INFO=y
+
+# MQTT configuration
+CONFIG_MQTT_PROTOCOL_311=y
+
+# Network configuration
+CONFIG_LWIP_MAX_SOCKETS=10
