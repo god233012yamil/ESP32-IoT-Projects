@@ -1,0 +1,11 @@
+idf_component_register(
+    SRCS
+        "hx711.c"
+    INCLUDE_DIRS
+        "include"
+    REQUIRES
+        driver
+        esp_timer
+        freertos
+        log
+)

@@ -1,0 +1,29 @@
+# ESP-IDF build artifacts
+build/
+sdkconfig
+sdkconfig.old
+*.bin
+*.elf
+*.map
+
+# VS Code / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+venv/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Secrets – never commit real credentials
+# Edit scale_config.h locally; do not push your Wi-Fi password

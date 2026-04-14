@@ -1,0 +1,49 @@
+# sdkconfig.defaults – ESP32-S3 Digital Scale
+# These values are applied when "idf.py reconfigure" or "idf.py menuconfig"
+# is run for the first time.  Committed values override ESP-IDF defaults;
+# user-specific secrets (SSID/password) should be set in scale_config.h or
+# via "idf.py menuconfig" and NOT committed to source control.
+
+# ── Target ────────────────────────────────────────────────────────────────────
+CONFIG_IDF_TARGET="esp32s3"
+
+# ── Flash ─────────────────────────────────────────────────────────────────────
+CONFIG_ESPTOOLPY_FLASHSIZE_4MB=y
+CONFIG_PARTITION_TABLE_SINGLE_APP=y
+
+# ── Wi-Fi ─────────────────────────────────────────────────────────────────────
+CONFIG_ESP_WIFI_STATIC_RX_BUFFER_NUM=10
+CONFIG_ESP_WIFI_DYNAMIC_RX_BUFFER_NUM=32
+CONFIG_ESP_WIFI_STATIC_TX_BUFFER=y
+CONFIG_ESP_WIFI_TX_BUFFER_TYPE=0
+CONFIG_ESP_WIFI_STATIC_TX_BUFFER_NUM=16
+CONFIG_ESP_WIFI_CACHE_TX_BUFFER_NUM=32
+
+# ── TCP/IP ────────────────────────────────────────────────────────────────────
+CONFIG_LWIP_MAX_SOCKETS=16
+CONFIG_LWIP_SOCKET_SELECT_TIMEOUT=y
+CONFIG_LWIP_TCP_KEEPALIVE=y
+
+# ── HTTP Server ───────────────────────────────────────────────────────────────
+CONFIG_HTTPD_MAX_REQ_HDR_LEN=1024
+CONFIG_HTTPD_MAX_URI_LEN=512
+CONFIG_HTTPD_ERR_RESP_NO_DELAY=y
+CONFIG_HTTPD_PURGE_CONNECTIONS=y
+
+# ── FreeRTOS ──────────────────────────────────────────────────────────────────
+CONFIG_FREERTOS_HZ=1000
+CONFIG_FREERTOS_USE_TRACE_FACILITY=y
+
+# ── Log level ─────────────────────────────────────────────────────────────────
+CONFIG_LOG_DEFAULT_LEVEL_INFO=y
+CONFIG_LOG_MAXIMUM_LEVEL_DEBUG=y
+
+# ── NVS ───────────────────────────────────────────────────────────────────────
+CONFIG_NVS_ENCRYPTION=n
+
+# ── UART Console ──────────────────────────────────────────────────────────────
+CONFIG_ESP_CONSOLE_UART_DEFAULT=y
+CONFIG_ESP_CONSOLE_UART_BAUDRATE=115200
+
+# ── cJSON ─────────────────────────────────────────────────────────────────────
+CONFIG_CJSON_ENABLE=y
