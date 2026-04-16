@@ -1,0 +1,25 @@
+# sdkconfig.defaults — ESP-IDF v5.4.1, target esp32s3
+
+# Target chip
+CONFIG_IDF_TARGET="esp32s3"
+
+# ULP RISC-V coprocessor
+# In v5.4.1 the prefix is ULP_COPROC_* (not ESP32S3_ULP_COPROC_*)
+CONFIG_ULP_COPROC_ENABLED=y
+CONFIG_ULP_COPROC_TYPE_RISCV=y
+CONFIG_ULP_COPROC_RESERVE_MEM=4096
+
+# Disable Bluetooth to save power
+CONFIG_BT_ENABLED=n
+
+# Log level: warnings only to minimise active CPU time on UART
+CONFIG_LOG_DEFAULT_LEVEL_WARN=y
+CONFIG_LOG_DEFAULT_LEVEL=2
+CONFIG_BOOTLOADER_LOG_LEVEL_WARN=y
+CONFIG_BOOTLOADER_LOG_LEVEL=2
+
+# Console
+CONFIG_ESP_CONSOLE_UART_NUM=0
+
+# Flash speed
+CONFIG_ESPTOOLPY_FLASHFREQ_80M=y
