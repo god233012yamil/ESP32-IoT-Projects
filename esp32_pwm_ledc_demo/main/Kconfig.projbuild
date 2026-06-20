@@ -1,0 +1,45 @@
+menu "ESP32 PWM LEDC Demo Configuration"
+
+    config PWM_DEMO_LED_GPIO
+        int "LED PWM GPIO"
+        default 2
+        help
+            GPIO used to demonstrate LED brightness control with PWM.
+
+    config PWM_DEMO_MOTOR_GPIO
+        int "Motor driver PWM GPIO"
+        default 18
+        help
+            GPIO used to demonstrate DC motor speed control through an external driver.
+
+    config PWM_DEMO_BUZZER_GPIO
+        int "Passive buzzer PWM GPIO"
+        default 19
+        help
+            GPIO used to demonstrate passive buzzer tone generation.
+
+    config PWM_DEMO_SERVO_GPIO
+        int "Servo signal GPIO"
+        default 21
+        help
+            GPIO used to demonstrate servo-style pulse generation.
+
+    config PWM_DEMO_ENABLE_MOTOR
+        bool "Enable motor speed demo"
+        default y
+        help
+            Enables the motor PWM demonstration. Use an external motor driver.
+
+    config PWM_DEMO_ENABLE_BUZZER
+        bool "Enable buzzer tone demo"
+        default y
+        help
+            Enables the passive buzzer tone demonstration.
+
+    config PWM_DEMO_ENABLE_SERVO
+        bool "Enable servo-style signal demo"
+        default y
+        help
+            Enables the servo-style pulse demonstration. Use an external servo supply.
+
+endmenu
