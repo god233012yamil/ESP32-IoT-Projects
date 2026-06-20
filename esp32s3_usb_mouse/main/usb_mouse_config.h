@@ -1,0 +1,19 @@
+#ifndef USB_MOUSE_CONFIG_H
+#define USB_MOUSE_CONFIG_H
+
+#include "driver/gpio.h"
+
+#define USB_MOUSE_BOOT_BUTTON_GPIO      GPIO_NUM_0
+#define USB_MOUSE_MOVE_DELTA            5
+#define USB_MOUSE_SQUARE_SIDE_STEPS     25
+#define USB_MOUSE_REPORT_DELAY_MS       20
+#define USB_MOUSE_CLICK_HOLD_MS         60
+#define USB_MOUSE_STARTUP_DELAY_MS      3000
+#define USB_MOUSE_IDLE_DELAY_MS         100
+#define USB_MOUSE_DEMO_REPEAT_DELAY_MS  1500
+
+#define USB_MOUSE_LEFT_BUTTON           0x01
+#define USB_MOUSE_RIGHT_BUTTON          0x02
+#define USB_MOUSE_MIDDLE_BUTTON         0x04
+
+#endif /* USB_MOUSE_CONFIG_H */
