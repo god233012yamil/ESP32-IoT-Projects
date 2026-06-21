@@ -1,0 +1,47 @@
+menu "UART Beginner Example Configuration"
+
+config APP_UART_PORT_NUM
+    int "UART controller number"
+    range 1 2
+    default 1
+    help
+        Select the hardware UART controller used by the example. UART0 is
+        intentionally avoided because it is normally used by the ESP-IDF
+        console and flashing interface.
+
+config APP_UART_TX_PIN
+    int "UART TX GPIO"
+    range 0 48
+    default 17
+    help
+        GPIO used to transmit data to the external UART device.
+
+config APP_UART_RX_PIN
+    int "UART RX GPIO"
+    range 0 48
+    default 16
+    help
+        GPIO used to receive data from the external UART device.
+
+config APP_UART_BAUD_RATE
+    int "UART baud rate"
+    range 1200 2000000
+    default 115200
+    help
+        Baud rate shared by the ESP32 and the external UART device.
+
+config APP_UART_RX_BUFFER_SIZE
+    int "UART RX ring buffer size"
+    range 256 8192
+    default 1024
+    help
+        Size, in bytes, of the UART driver's receive ring buffer.
+
+config APP_UART_TX_BUFFER_SIZE
+    int "UART TX ring buffer size"
+    range 0 8192
+    default 1024
+    help
+        Size, in bytes, of the UART driver's transmit ring buffer.
+
+endmenu
