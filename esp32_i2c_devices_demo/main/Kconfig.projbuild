@@ -1,0 +1,81 @@
+menu "ESP32 I2C Devices Demo Configuration"
+
+config APP_I2C_PORT
+    int "I2C controller port"
+    range 0 1
+    default 0
+    help
+        Hardware I2C controller used by the application.
+
+config APP_I2C_SDA_GPIO
+    int "SDA GPIO"
+    range 0 48
+    default 21
+    help
+        GPIO used for the I2C SDA signal. Verify the selected GPIO is valid
+        for the target ESP32 board.
+
+config APP_I2C_SCL_GPIO
+    int "SCL GPIO"
+    range 0 48
+    default 22
+    help
+        GPIO used for the I2C SCL signal. Verify the selected GPIO is valid
+        for the target ESP32 board.
+
+config APP_I2C_CLOCK_HZ
+    int "I2C clock frequency"
+    range 10000 1000000
+    default 100000
+    help
+        I2C bus clock frequency in hertz. Start with 100000 Hz and increase
+        only when every connected device and the physical bus support it.
+
+config APP_I2C_ENABLE_INTERNAL_PULLUPS
+    bool "Enable ESP32 internal pull-up resistors"
+    default y
+    help
+        Enables the weak internal GPIO pull-ups. External pull-up resistors
+        are still recommended for reliable hardware.
+
+config APP_ENABLE_TMP102_DEMO
+    bool "Enable TMP102 temperature sensor demo"
+    default y
+
+config APP_TMP102_ADDRESS
+    hex "TMP102 I2C address"
+    range 0x08 0x77
+    default 0x48
+    depends on APP_ENABLE_TMP102_DEMO
+
+config APP_ENABLE_SSD1306_DEMO
+    bool "Enable SSD1306 OLED display demo"
+    default y
+
+config APP_SSD1306_ADDRESS
+    hex "SSD1306 I2C address"
+    range 0x08 0x77
+    default 0x3C
+    depends on APP_ENABLE_SSD1306_DEMO
+
+config APP_ENABLE_EEPROM_DEMO
+    bool "Enable 24LC256 EEPROM demo"
+    default y
+
+config APP_EEPROM_ADDRESS
+    hex "24LC256 I2C address"
+    range 0x08 0x77
+    default 0x50
+    depends on APP_ENABLE_EEPROM_DEMO
+
+config APP_EEPROM_TEST_ADDRESS
+    hex "EEPROM test memory address"
+    range 0x0000 0x7FFF
+    default 0x0100
+    depends on APP_ENABLE_EEPROM_DEMO
+    help
+        EEPROM location used by the non-destructive demonstration. The demo
+        saves the original bytes, writes a test pattern, verifies it, and then
+        restores the original bytes.
+
+endmenu
