@@ -1,0 +1,28 @@
+menu "Context Switch Demo"
+
+config DEMO_GPIO_CONTROL_TRACE
+    int "Control task trace GPIO"
+    default 2
+    help
+        GPIO driven high while the high-priority control task is executing.
+
+config DEMO_GPIO_COMMS_TRACE
+    int "Communication task trace GPIO"
+    default 4
+    help
+        GPIO toggled by the communication producer task.
+
+config DEMO_GPIO_BACKGROUND_TRACE
+    int "Background task trace GPIO"
+    default 5
+    help
+        GPIO toggled by the low-priority background task.
+
+config DEMO_CONTROL_PERIOD_US
+    int "Control task period in microseconds"
+    default 10000
+    range 1000 1000000
+    help
+        Period of the hardware timer interrupt that wakes the control task.
+
+endmenu
