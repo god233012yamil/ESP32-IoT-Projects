@@ -1,0 +1,77 @@
+menu "ESP-NOW Low-Power Mesh Configuration"
+
+choice APP_NODE_ROLE
+    prompt "Node role"
+    default APP_ROLE_LEAF
+
+    config APP_ROLE_ROOT
+        bool "Root gateway (always awake)"
+
+    config APP_ROLE_ROUTER
+        bool "Router node (always awake)"
+
+    config APP_ROLE_LEAF
+        bool "Leaf sensor node (deep sleep)"
+endchoice
+
+config APP_NODE_ID
+    int "Logical node ID"
+    range 1 65535
+    default 1
+
+config APP_PARENT_MAC
+    string "Parent MAC address (AA:BB:CC:DD:EE:FF)"
+    default "FF:FF:FF:FF:FF:FF"
+    help
+        Used by router and leaf roles. Use the upstream router or root MAC.
+
+config APP_WIFI_CHANNEL
+    int "ESP-NOW Wi-Fi channel"
+    range 1 13
+    default 1
+
+config APP_WAKE_INTERVAL_SEC
+    int "Leaf wake interval in seconds"
+    range 5 86400
+    default 60
+
+config APP_BEACON_INTERVAL_MS
+    int "Root synchronization beacon interval in milliseconds"
+    range 100 60000
+    default 1000
+
+config APP_BEACON_WAIT_MS
+    int "Leaf beacon wait window in milliseconds"
+    range 50 5000
+    default 600
+
+config APP_ACK_TIMEOUT_MS
+    int "ACK timeout in milliseconds"
+    range 10 2000
+    default 120
+
+config APP_MAX_RETRIES
+    int "Maximum packet retries"
+    range 0 10
+    default 3
+
+config APP_FORWARD_TTL
+    int "Initial mesh packet TTL"
+    range 1 32
+    default 6
+
+config APP_ENABLE_ENCRYPTION
+    bool "Enable ESP-NOW peer encryption"
+    default n
+
+config APP_PMK
+    string "ESP-NOW PMK (16 ASCII characters)"
+    default "pmk1234567890123"
+    depends on APP_ENABLE_ENCRYPTION
+
+config APP_LMK
+    string "ESP-NOW LMK (16 ASCII characters)"
+    default "lmk1234567890123"
+    depends on APP_ENABLE_ENCRYPTION
+
+endmenu
