@@ -1,0 +1,42 @@
+[
+  {
+    "path": "CMakeLists.txt",
+    "size": 121
+  },
+  {
+    "path": "README.md",
+    "size": 4754
+  },
+  {
+    "path": "docs/PRODUCTION_SECURITY_CHECKLIST.md",
+    "size": 2528
+  },
+  {
+    "path": "main/CMakeLists.txt",
+    "size": 196
+  },
+  {
+    "path": "main/idf_component.yml",
+    "size": 75
+  },
+  {
+    "path": "main/main.c",
+    "size": 5338
+  },
+  {
+    "path": "main/secure_storage.c",
+    "size": 17613
+  },
+  {
+    "path": "main/secure_storage.h",
+    "size": 3047
+  },
+  {
+    "path": "partitions.csv",
+    "size": 292
+  },
+  {
+    "path": "sdkconfig.defaults",
+    "size": 336
+  }
+]

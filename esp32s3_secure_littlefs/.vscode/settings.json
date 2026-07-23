@@ -1,0 +1,12 @@
+{
+  "idf.currentSetup": "C:\\Users\\YankiMainDesk\\esp\\v5.4.1\\esp-idf",
+  "idf.customExtraVars": {
+    "IDF_TARGET": "esp32s3"
+  },
+  "idf.flashType": "UART",
+  "idf.openOcdConfigs": [
+    "board/esp32s3-builtin.cfg"
+  ],
+  "idf.portWin": "COM1",
+  "idf.monitorPort": "COM1"
+}

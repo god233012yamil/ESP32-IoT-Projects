@@ -1,0 +1,14 @@
+idf_component_register(
+    SRCS
+        "main.c"
+        "secure_storage.c"
+    INCLUDE_DIRS
+        "."
+    REQUIRES
+        esp_system
+        esp_partition
+        spi_flash
+        mbedtls
+    PRIV_REQUIRES
+        bootloader_support
+)
